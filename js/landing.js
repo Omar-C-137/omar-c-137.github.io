@@ -13,7 +13,7 @@ let chosenRole=null;
       e.g. https://yourdomain.com  (Google Sign-In does NOT work on file:// or localhost without setup)
    4. Paste the Client ID below
 */
-const GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
+const GOOGLE_CLIENT_ID = '105089517949-8882htplnslcj242r6v6rt603f3ia3hm.apps.googleusercontent.com';
 
 function initGoogleSignIn(){
   if(typeof google==='undefined'||!google.accounts){
