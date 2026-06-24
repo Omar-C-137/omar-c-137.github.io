@@ -16,59 +16,14 @@ let chosenRole=null;
 const GOOGLE_CLIENT_ID = '987120778850-jua4bnal1cp5hjqv4o6nojdlajiumvm0.apps.googleusercontent.com';
 
 function initGoogleSignIn(){
-  if(typeof google==='undefined'||!google.accounts){
-    console.warn('Google Identity script not loaded yet.');
-    return;
-  }
-  google.accounts.id.initialize({
-    client_id: GOOGLE_CLIENT_ID,
-    callback: handleGoogleCredential,
-    auto_select: false,
-  });
+  // Google Sign-In is now handled by the React app
+  // The landing page redirects to /app for authentication
 }
 
-/* Called automatically by Google after a successful sign-in */
-function handleGoogleCredential(response){
-  try{
-    const payload=parseJwt(response.credential);
-    const account={
-      name: payload.name || 'Google User',
-      email: payload.email,
-      role: chosenRole || localStorage.getItem('to_pending_role') || 'trainee',
-      provider:'google',
-      avatar: payload.picture || null,
-      createdAt: new Date().toISOString()
-    };
-    localStorage.setItem('to_account', JSON.stringify(account));
-    localStorage.setItem('to_logged_in','true');
-    localStorage.setItem('to_active_role', account.role);
-    redirectByRole(account.role);
-  }catch(e){
-    alert('Google sign-in failed to process. Please try again.');
-    console.error(e);
-  }
-}
-
-/* Decode the JWT Google sends back (no verification needed client-side; the server should verify in production) */
-function parseJwt(token){
-  const base64Url=token.split('.')[1];
-  const base64=base64Url.replace(/-/g,'+').replace(/_/g,'/');
-  const jsonPayload=decodeURIComponent(atob(base64).split('').map(c=>'%'+('00'+c.charCodeAt(0).toString(16)).slice(-2)).join(''));
-  return JSON.parse(jsonPayload);
-}
-
-/* Trigger the Google One Tap / popup sign-in flow */
 function triggerGoogleSignIn(roleContext){
-  if(roleContext) chosenRole=roleContext;
-  if(GOOGLE_CLIENT_ID.includes('YOUR_GOOGLE_CLIENT_ID')){
-    alert('Google Sign-In is not configured yet.\n\nTo enable it:\n1. Create OAuth credentials at console.cloud.google.com\n2. Add your site URL as an authorized origin\n3. Paste your Client ID into js/landing.js (GOOGLE_CLIENT_ID)\n\nGoogle Sign-In only works when this site is hosted on a real domain — it will not work opened as a local file.');
-    return;
-  }
-  if(typeof google==='undefined'||!google.accounts){
-    alert('Google Sign-In script failed to load. Check your internet connection.');
-    return;
-  }
-  google.accounts.id.prompt();
+  // Redirect to app instead
+  if(roleContext) localStorage.setItem('to_pending_role', roleContext);
+  window.location.href = '/app?mode=signin';
 }
 
 /* ── ENTRY MODAL (Sign In) ── */
@@ -110,10 +65,13 @@ function backToRoleModal(){ closeSignupModal(); openRoleModal() }
 /* ── FACEBOOK (still a UI placeholder — see note) ── */
 function socialAuth(provider){
   if(provider==='Google'){
-    triggerGoogleSignIn(chosenRole);
+    // Redirect to app for real OAuth
+    localStorage.setItem('to_pending_role', chosenRole || 'trainee');
+    window.location.href = '/app?mode=signin';
     return;
   }
-  alert(provider+' sign-in requires a backend server with OAuth credentials.\n\nThis is a static front-end — once T-O is hosted on a server with Facebook OAuth set up, this button will work for real.\n\nFor now, continue with email below, or use Google Sign-In which is wired up.');
+  alert(provider+' sign-in requires backend OAuth.\n\nRedirecting to sign-in page...');
+  window.location.href = '/app?mode=signin';
 }
 
 /* ── EMAIL/PASSWORD LOGIN (local-only fallback, no backend yet) ── */

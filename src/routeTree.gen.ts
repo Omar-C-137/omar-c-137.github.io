@@ -15,6 +15,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/authenticated/r
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ShareShareIdRouteImport } from './routes/share.$shareId'
 import { Route as AuthenticatedAppRouteImport } from './routes/authenticated/app'
+import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -46,20 +47,27 @@ const AuthenticatedAppRoute = AuthenticatedAppRouteImport.update({
   path: '/app',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/callback',
+  path: '/callback',
+  getParentRoute: () => AuthRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/authenticated': typeof AuthenticatedRouteRouteWithChildren
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/authenticated/app': typeof AuthenticatedAppRoute
   '/share/$shareId': typeof ShareShareIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/authenticated': typeof AuthenticatedRouteRouteWithChildren
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/authenticated/app': typeof AuthenticatedAppRoute
   '/share/$shareId': typeof ShareShareIdRoute
 }
@@ -67,8 +75,9 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/authenticated': typeof AuthenticatedRouteRouteWithChildren
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/authenticated/app': typeof AuthenticatedAppRoute
   '/share/$shareId': typeof ShareShareIdRoute
 }
@@ -79,6 +88,7 @@ export interface FileRouteTypes {
     | '/authenticated'
     | '/auth'
     | '/sitemap.xml'
+    | '/auth/callback'
     | '/authenticated/app'
     | '/share/$shareId'
   fileRoutesByTo: FileRoutesByTo
@@ -87,6 +97,7 @@ export interface FileRouteTypes {
     | '/authenticated'
     | '/auth'
     | '/sitemap.xml'
+    | '/auth/callback'
     | '/authenticated/app'
     | '/share/$shareId'
   id:
@@ -95,6 +106,7 @@ export interface FileRouteTypes {
     | '/authenticated'
     | '/auth'
     | '/sitemap.xml'
+    | '/auth/callback'
     | '/authenticated/app'
     | '/share/$shareId'
   fileRoutesById: FileRoutesById
@@ -102,7 +114,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
-  AuthRoute: typeof AuthRoute
+  AuthRoute: typeof AuthRouteWithChildren
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ShareShareIdRoute: typeof ShareShareIdRoute
 }
@@ -151,6 +163,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof AuthRoute
+    }
   }
 }
 
@@ -165,10 +184,20 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface AuthRouteChildren {
+  AuthCallbackRoute: typeof AuthCallbackRoute
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
+  AuthCallbackRoute: AuthCallbackRoute,
+}
+
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
-  AuthRoute: AuthRoute,
+  AuthRoute: AuthRouteWithChildren,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ShareShareIdRoute: ShareShareIdRoute,
 }

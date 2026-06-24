@@ -18,8 +18,10 @@ export async function signUpWithEmail(email: string, password: string, displayNa
 }
 
 export async function signInWithGoogle() {
-  return lovable.auth.signInWithOAuth("google", {
-    redirect_uri: typeof window !== "undefined" ? window.location.origin : undefined,
+  return supabase.auth.signInWithOAuth("google", {
+    redirectTo: typeof window !== "undefined" 
+      ? `${window.location.origin}/auth/callback`
+      : undefined,
   });
 }
 
