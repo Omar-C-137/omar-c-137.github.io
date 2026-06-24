@@ -13,7 +13,7 @@ import { useTheme } from "@/hooks/use-theme";
 import { signOut } from "@/lib/auth";
 import { useNavigate } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/_authenticated/app")({
+export const Route = createFileRoute("/authenticated/app")({
   head: () => ({
     meta: [
       { title: "Tracker — T-O" },
