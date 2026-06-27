@@ -1,0 +1,6 @@
+{
+  "name": "T-0 Fitness Platform",
+  "description": "A premium coach-trainee fitness tracking platform with workout and diet planners, real-time progress tracking, and Supabase integration.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

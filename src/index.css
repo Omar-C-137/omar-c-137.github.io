@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Bebas Neue", sans-serif;
+  
+  --color-brand-yellow: #F5E642;
+  --color-brand-orange: #FF6B2B;
+  --color-brand-orange-dark: #D95520;
+  --color-brand-dark: #0A0A0A;
+  --color-brand-surface: #111111;
+  --color-brand-card: #141414;
+  --color-brand-border: #222222;
+}
+
+/* Custom styles for glowing effects and grid backgrounds */
+.hero-bg-grid {
+  background-image: linear-gradient(rgba(255, 107, 43, 0.03) 1px, transparent 1px), 
+                    linear-gradient(90deg, rgba(255, 107, 43, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.glow-orb {
+  border-radius: 50%;
+  filter: blur(140px);
+  opacity: 0.12;
+  pointer-events: none;
+}
+
+/* Custom Scrollbar for sleek dark panels */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #333333;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #444444;
+}
+
