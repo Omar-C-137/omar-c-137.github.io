@@ -178,10 +178,15 @@
       border: 1px solid var(--border-col);
       border-radius: 8px;
       padding: 1rem;
-      transition: border-color 0.2s;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
       position: relative;
     }
-    .my-ex-card:hover { border-color: #333; }
+    /* Lighting glow animation on hover[cite: 1] */
+    .my-ex-card:hover { 
+      border-color: var(--orange); 
+      transform: translateY(-2px);
+      box-shadow: 0 0 15px rgba(255, 107, 43, 0.25), inset 0 0 8px rgba(255, 107, 43, 0.05);
+    }
     .my-ex-card-top {
       display: flex;
       align-items: flex-start;
@@ -199,6 +204,7 @@
       outline: none;
       font-family: var(--font-body);
       padding: 0;
+      pointer-events: none; /* Block direct interaction[cite: 1] */
     }
     .my-ex-card-name::placeholder { color: var(--text-sec); }
     .my-ex-expand-btn {
@@ -214,6 +220,7 @@
       justify-content: center;
       flex-shrink: 0;
       transition: all 0.15s;
+      pointer-events: auto; /* Ensure explicitly interactive[cite: 1] */
     }
     .my-ex-expand-btn:hover { border-color: var(--orange); color: var(--orange); }
     .my-ex-card-stats {
@@ -232,8 +239,8 @@
       font-family: var(--font-body);
       outline: none;
       transition: border-color 0.15s;
+      pointer-events: none; /* Block direct interaction[cite: 1] */
     }
-    .my-ex-stat:focus { border-color: var(--orange); color: var(--text); }
     .my-ex-del-btn {
       background: transparent;
       border: none;
@@ -247,6 +254,7 @@
       margin-top: 0.6rem;
       opacity: 0.5;
       transition: opacity 0.15s, color 0.15s;
+      pointer-events: auto; /* Ensure explicitly interactive[cite: 1] */
     }
     .my-ex-del-btn:hover { opacity: 1; color: #ff6b7a; }
 
@@ -912,14 +920,11 @@ function buildExerciseCard(planType, dayIdx, exIdx, item) {
   const card = document.createElement('div');
   card.className = 'my-ex-card';
 
-  const hasSets = item.sets || item.reps;
   const statsHtml = `
     <div class="my-ex-card-stats">
-      <input class="my-ex-stat" type="text" value="${item.sets||''}" placeholder="Sets" title="Sets"
-        oninput="myPlanState['${planType}'][${dayIdx}].items[${exIdx}].sets=this.value"/>
+      <input class="my-ex-stat" type="text" value="${item.sets||''}" placeholder="Sets" title="Sets" readonly/>
       <span style="color:var(--text-sec);font-size:0.75rem;align-self:center;flex-shrink:0">×</span>
-      <input class="my-ex-stat" type="text" value="${item.reps||''}" placeholder="Reps" title="Reps"
-        oninput="myPlanState['${planType}'][${dayIdx}].items[${exIdx}].reps=this.value"/>
+      <input class="my-ex-stat" type="text" value="${item.reps||''}" placeholder="Reps" title="Reps" readonly/>
     </div>`;
 
   // thumbnail if media exists
@@ -933,8 +938,7 @@ function buildExerciseCard(planType, dayIdx, exIdx, item) {
 
   card.innerHTML = `
     <div class="my-ex-card-top">
-      <input class="my-ex-card-name" type="text" value="${item.name}" placeholder="Exercise name"
-        oninput="myPlanState['${planType}'][${dayIdx}].items[${exIdx}].name=this.value"/>
+      <input class="my-ex-card-name" type="text" value="${item.name}" placeholder="Exercise name" readonly/>
       <button class="my-ex-expand-btn" title="Edit details">+</button>
     </div>
     ${statsHtml}
