@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>T-0 — Coach Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+    /* ── COACH EXTRA STYLES ── */
+    .user-id-chip {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: rgba(255,107,43,0.08);
+      border: 1px solid rgba(255,107,43,0.2);
+      border-radius: 4px;
+      padding: 0.3rem 0.7rem;
+      font-size: 0.72rem;
+      color: var(--text-sec);
+      font-family: monospace;
+      cursor: pointer;
+      transition: all 0.2s;
+      max-width: 260px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    .user-id-chip:hover { border-color: var(--orange); color: var(--orange); }
+
+    /* Modal shared */
+    .modal-bg { position:fixed; inset:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(8px); display:none; justify-content:center; align-items:center; z-index:300; }
+    .modal-bg.open { display:flex; }
+    .modal { background:var(--surface); border:1px solid var(--border-col); padding:2rem; width:100%; max-width:500px; border-radius:8px; position:relative; max-height:90vh; overflow-y:auto; }
+    .modal-close { position:absolute; top:1rem; right:1rem; background:transparent; border:none; color:var(--text-sec); font-size:1.2rem; cursor:pointer; }
+    .modal h2 { font-family:var(--font-display); font-size:1.8rem; margin-bottom:0.25rem; }
+    .modal p.sub { color:var(--text-sec); font-size:0.85rem; margin-bottom:1.5rem; }
+
+    /* Add client modal */
+    .modal-field { display:flex; flex-direction:column; gap:0.4rem; margin-bottom:1rem; }
+    .modal-field label { font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-sec); }
+    .modal-field input, .modal-field textarea, .modal-field select {
+      background:var(--input-bg); border:1px solid var(--input-border);
+      color:var(--text); padding:0.7rem 0.9rem; border-radius:4px;
+      font-family:var(--font-body); font-size:0.9rem; outline:none;
+      transition:border-color 0.15s; width:100%;
+    }
+    .modal-field input:focus, .modal-field textarea:focus { border-color:var(--orange); }
+    .modal-field textarea { height:80px; resize:vertical; }
+    .modal-actions { display:flex; justify-content:flex-end; gap:0.75rem; margin-top:1.5rem; }
+
+    /* Plan editor */
+    .plan-editor-day { background:var(--card-bg); border:1px solid var(--border-col); border-radius:6px; padding:1rem; margin-bottom:0.75rem; }
+    .plan-editor-day-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:0.75rem; }
+    .plan-editor-day-label { font-size:0.85rem; font-weight:700; color:var(--orange); }
+    .plan-item-row { display:flex; align-items:center; gap:0.5rem; margin-bottom:0.4rem; }
+    .plan-item-row input { flex:1; background:var(--input-bg); border:1px solid var(--input-border); color:var(--text); padding:0.5rem 0.75rem; border-radius:4px; font-family:var(--font-body); font-size:0.85rem; outline:none; }
+    .plan-item-row input:focus { border-color:var(--orange); }
+    .plan-item-del { background:transparent; border:none; color:var(--text-sec); cursor:pointer; font-size:1rem; padding:0.3rem; }
+    .plan-item-del:hover { color:#ff6b7a; }
+
+    .btn-add-item { background:transparent; border:1px dashed var(--border-col); color:var(--text-sec); padding:0.45rem 0.9rem; border-radius:4px; font-size:0.8rem; cursor:pointer; font-family:var(--font-body); transition:all 0.2s; }
+    .btn-add-item:hover { border-color:var(--orange); color:var(--orange); }
+    .btn-add-day { background:transparent; border:1px dashed var(--border-col); color:var(--text-sec); padding:0.6rem 1.2rem; border-radius:4px; font-size:0.85rem; cursor:pointer; font-family:var(--font-body); width:100%; margin-bottom:1rem; transition:all 0.2s; }
+    .btn-add-day:hover { border-color:var(--orange); color:var(--orange); }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 2rem; right: 2rem;
+      background: #1a1a1a; border: 1px solid #333;
+      color: var(--text); padding: 0.75rem 1.25rem;
+      border-radius: 6px; font-size: 0.85rem;
+      z-index: 999; transform: translateY(100px); opacity: 0;
+      transition: all 0.3s; box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    /* Empty state */
+    .empty-state { text-align:center; padding:4rem 2rem; color:var(--text-sec); }
+    .empty-state h3 { font-size:1.1rem; margin-bottom:0.5rem; color:var(--text); }
+    .empty-state p { font-size:0.85rem; margin-bottom:1.5rem; }
+
+    /* Search bar */
+    .search-bar { position:relative; margin-bottom:1.5rem; }
+    .search-bar input { width:100%; background:var(--input-bg); border:1px solid var(--input-border); color:var(--text); padding:0.7rem 0.9rem 0.7rem 2.5rem; border-radius:4px; font-family:var(--font-body); font-size:0.9rem; outline:none; transition:border-color 0.15s; }
+    .search-bar input:focus { border-color:var(--orange); }
+    .search-bar svg { position:absolute; left:0.75rem; top:50%; transform:translateY(-50%); width:16px; height:16px; stroke:var(--text-sec); fill:none; pointer-events:none; }
+
+    /* Progress input */
+    input[type="range"] { -webkit-appearance:none; width:100%; height:4px; background:var(--border-col); border-radius:2px; outline:none; }
+    input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; width:16px; height:16px; border-radius:50%; background:var(--orange); cursor:pointer; }
+    .progress-row { display:flex; align-items:center; gap:1rem; }
+    .progress-val { font-size:0.85rem; font-weight:700; color:var(--orange); min-width:35px; }
+
+    .client-profile-card-layout { display:grid; grid-template-columns:80px 1fr; gap:2rem; }
+    @media(max-width:600px) { .client-profile-card-layout { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-left-group">
+    <div class="logo" id="nav-logo">T-0</div>
+  </div>
+  <div class="nav-right">
+    <div class="nav-dropdown-container">
+      <button type="button" class="nav-sidebar-toggle" id="menu-toggle-btn" aria-label="Open features menu">
+        <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+      </button>
+      <div class="nav-dropdown-menu" id="navDropdownMenu">
+        <div class="dropdown-item-header">Features & Add-ons</div>
+        <a href="#" class="dropdown-item" id="calorie-feature-btn">
+          <span class="item-icon">🔥</span>
+          <div class="item-text"><div class="item-title">Calorie Calculator</div><div class="item-desc">Premium Feature Add-on</div></div>
+          <span class="item-price">$4.99</span>
+        </a>
+        <a href="#" class="dropdown-item" id="signout-btn">
+          <span class="item-icon">🚪</span>
+          <div class="item-text"><div class="item-title">Sign Out</div><div class="item-desc">Exit your session</div></div>
+        </a>
+      </div>
+    </div>
+    <button type="button" class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode"></button>
+  </div>
+</nav>
+
+<!-- DASHBOARD -->
+<div id="page-dashboard" class="page active">
+  <div class="dashboard-layout" id="dash-layout">
+    <div class="hero-bg-grid"></div>
+    <div class="glow-orb orb-dash-1"></div>
+    <div class="glow-orb orb-dash-2"></div>
+
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <span id="sb-coach-name">Coach</span>
+        <button type="button" class="sidebar-toggle-btn toggle-sidebar-trigger" title="Collapse">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+        </button>
+      </div>
+      <div class="sidebar-section-label">Menu</div>
+      <div class="sidebar-item active" id="menu-item-profile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        My Profile
+      </div>
+      <div class="sidebar-item" id="menu-item-clients">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        My Clients
+      </div>
+      <div id="clients-submenu"></div>
+    </div>
+
+    <div class="main-content">
+      <div class="dash-header">
+        <div class="header-title-area">
+          <button type="button" class="sidebar-toggle-floating toggle-sidebar-trigger" title="Expand Sidebar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+          </button>
+          <div>
+            <div class="dash-subtitle">Coach Dashboard</div>
+            <h1>Welcome, <span class="accent-orange" id="header-coach-name">Coach!</span></h1>
+          </div>
+        </div>
+        <button type="button" class="btn btn-orange" id="header-add-client-btn">+ Add client</button>
+      </div>
+
+      <!-- PROFILE SECTION -->
+      <div id="section-profile">
+        <div class="dash-tabs">
+          <div class="dash-tab active">My Profile</div>
+          <div class="dash-tab pointer tab-trigger-clients">My Clients</div>
+        </div>
+
+        <!-- User ID chip -->
+        <div style="margin-bottom:1.5rem;">
+          <div style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-sec);margin-bottom:0.5rem;">Your User ID (share with trainees)</div>
+          <div class="user-id-chip" id="profile-user-id" title="Click to copy">📋 Loading...</div>
+        </div>
+
+        <div class="profile-card">
+          <div class="avatar-wrapper">
+            <div class="avatar" id="profile-avatar">OA</div>
+            <div>
+              <div style="font-weight:600;font-size:1rem;margin-bottom:0.25rem" id="profile-display-name">Coach</div>
+              <div style="font-size:0.8rem;color:var(--text-sec)" id="profile-email-display"></div>
+            </div>
+          </div>
+          <div class="form-grid">
+            <div class="form-group"><label>Full name</label><input type="text" id="pf-name" placeholder="Your name"/></div>
+            <div class="form-group"><label>Specialty</label><input type="text" id="pf-specialty" placeholder="Strength & Conditioning"/></div>
+            <div class="form-group full"><label>Bio</label><textarea id="pf-bio" placeholder="Tell your clients about your experience..."></textarea></div>
+            <div class="form-group form-actions-right gap08">
+              <button type="button" class="btn btn-orange btn-sm" id="save-profile-btn">Save profile</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CLIENTS SECTION -->
+      <div id="section-clients" class="hidden">
+        <div class="dash-tabs">
+          <div class="dash-tab pointer tab-trigger-profile">My Profile</div>
+          <div class="dash-tab active">My Clients</div>
+        </div>
+        <div class="search-bar">
+          <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="client-search" placeholder="Search clients..."/>
+        </div>
+        <div class="clients-grid" id="clients-grid"></div>
+      </div>
+
+      <!-- CLIENT DETAIL SECTION -->
+      <div id="section-client-detail" class="hidden">
+        <div class="breadcrumb-wrapper">
+          <button type="button" class="btn btn-black-card btn-sm" id="detail-back-btn">← Back</button>
+          <div class="breadcrumb-static">My Clients / <span id="breadcrumb-name" class="breadcrumb-active"></span></div>
+        </div>
+        <div class="client-detail-header">
+          <div class="client-avatar client-avatar-lg" id="detail-initials">AJ</div>
+          <div>
+            <h2 id="detail-name"></h2>
+            <p id="detail-meta"></p>
+          </div>
+        </div>
+        <div class="dash-tabs" id="detail-tabs">
+          <div class="dash-tab active" data-tab="profile">Profile</div>
+          <div class="dash-tab" data-tab="workout">Workout Plan</div>
+          <div class="dash-tab" data-tab="diet">Diet Plan</div>
+        </div>
+
+        <!-- Client Profile Tab -->
+        <div id="client-profile-tab">
+          <div class="profile-card client-profile-card-layout">
+            <div class="client-avatar client-avatar-lg" id="detail-av">AJ</div>
+            <div class="form-grid">
+              <div class="form-group"><label>Full name</label><input type="text" id="cf-name" readonly style="opacity:0.7"/></div>
+              <div class="form-group"><label>Current weight</label><input type="text" id="cf-weight" placeholder="75 kg"/></div>
+              <div class="form-group"><label>Goal</label><input type="text" id="cf-goal" placeholder="Fat loss / Muscle gain"/></div>
+              <div class="form-group"><label>Weekly sessions</label><input type="text" id="cf-sessions" placeholder="4"/></div>
+              <div class="form-group full"><label>Notes</label><textarea id="cf-notes" placeholder="Any special considerations..."></textarea></div>
+              <div class="form-group full">
+                <label>Progress — <span id="progress-label">0%</span></label>
+                <div class="progress-row">
+                  <input type="range" min="0" max="100" id="cf-progress" value="0"/>
+                  <span class="progress-val" id="progress-val-display">0%</span>
+                </div>
+              </div>
+              <div class="form-group full">
+                <label>Status</label>
+                <select id="cf-tag">
+                  <option value="new">New</option>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
+              <div class="form-group form-actions-end">
+                <button type="button" class="btn btn-orange btn-sm" id="save-client-btn">Save changes</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Workout Plan Tab -->
+        <div id="client-workout-tab" class="hidden">
+          <div class="profile-card">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+              <h3 style="font-size:1rem;font-weight:700;">Workout Plan</h3>
+              <button class="btn btn-orange btn-sm" id="save-workout-btn">Save plan</button>
+            </div>
+            <div id="workout-editor"></div>
+            <button class="btn-add-day" id="add-workout-day">+ Add day</button>
+          </div>
+        </div>
+
+        <!-- Diet Plan Tab -->
+        <div id="client-diet-tab" class="hidden">
+          <div class="profile-card">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+              <h3 style="font-size:1rem;font-weight:700;">Diet Plan</h3>
+              <button class="btn btn-orange btn-sm" id="save-diet-btn">Save plan</button>
+            </div>
+            <div id="diet-editor"></div>
+            <button class="btn-add-day" id="add-diet-day">+ Add day</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD CLIENT MODAL -->
+<div class="modal-bg" id="add-client-modal">
+  <div class="modal">
+    <button class="modal-close" id="add-modal-close">✕</button>
+    <h2>Add Client</h2>
+    <p class="sub">Enter the trainee's User ID to link them to your roster</p>
+    <div class="modal-field">
+      <label>Trainee User ID</label>
+      <input type="text" id="add-trainee-id" placeholder="Paste trainee's User ID here..."/>
+    </div>
+    <div id="trainee-preview" style="display:none;padding:0.75rem;background:var(--card-bg);border:1px solid var(--border-col);border-radius:6px;margin-bottom:1rem;">
+      <div style="font-size:0.8rem;color:var(--text-sec);margin-bottom:0.25rem;">Found trainee:</div>
+      <div id="trainee-preview-name" style="font-weight:600;"></div>
+      <div id="trainee-preview-email" style="font-size:0.8rem;color:var(--text-sec);"></div>
+    </div>
+    <div class="modal-field">
+      <label>Goal</label>
+      <input type="text" id="add-goal" placeholder="Fat loss / Muscle gain"/>
+    </div>
+    <div class="modal-field">
+      <label>Current weight</label>
+      <input type="text" id="add-weight" placeholder="75 kg"/>
+    </div>
+    <div class="modal-field">
+      <label>Notes</label>
+      <textarea id="add-notes" placeholder="Starting condition, injuries, preferences..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline btn-sm" id="add-modal-cancel">Cancel</button>
+      <button class="btn btn-orange btn-sm" id="confirm-add-client-btn">Add client</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+let currentUser = null;
+let currentProfile = null;
+let clients = [];
+let currentClientId = null; // trainee_id of currently open client
+
+/* ── AUTH GUARD ── */
+async function init() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) { window.location.href = 'auth.html'; return; }
+  currentUser = session.user;
+
+  const { data: profile } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
+  if (!profile || profile.role !== 'coach') { window.location.href = 'trainee.html'; return; }
+  currentProfile = profile;
+  populateProfileUI();
+  loadClients();
+}
+init();
+
+/* ── PROFILE UI ── */
+function populateProfileUI() {
+  const name = currentProfile.full_name || currentUser.email;
+  const initials = name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+  document.getElementById('sb-coach-name').textContent = name;
+  document.getElementById('header-coach-name').textContent = name.split(' ')[0] + '!';
+  document.getElementById('profile-avatar').textContent = initials;
+  document.getElementById('profile-display-name').textContent = name;
+  document.getElementById('profile-email-display').textContent = currentUser.email;
+  document.getElementById('pf-name').value = currentProfile.full_name || '';
+  document.getElementById('pf-specialty').value = currentProfile.specialty || '';
+  document.getElementById('pf-bio').value = currentProfile.bio || '';
+
+  const idEl = document.getElementById('profile-user-id');
+  idEl.textContent = '📋 ' + currentUser.id;
+  idEl.addEventListener('click', () => {
+    navigator.clipboard.writeText(currentUser.id).then(() => showToast('User ID copied!'));
+  });
+}
+
+document.getElementById('save-profile-btn').addEventListener('click', async () => {
+  const updates = {
+    full_name: document.getElementById('pf-name').value.trim(),
+    specialty: document.getElementById('pf-specialty').value.trim(),
+    bio: document.getElementById('pf-bio').value.trim()
+  };
+  const { error } = await sb.from('profiles').update(updates).eq('id', currentUser.id);
+  if (error) showToast('Error: ' + error.message);
+  else {
+    currentProfile = { ...currentProfile, ...updates };
+    populateProfileUI();
+    showToast('Profile saved ✓');
+  }
+});
+
+/* ── LOAD CLIENTS ── */
+async function loadClients() {
+  const { data, error } = await sb
+    .from('coach_clients')
+    .select('*, trainee:profiles!coach_clients_trainee_id_fkey(id,full_name,email)')
+    .eq('coach_id', currentUser.id)
+    .order('created_at');
+  if (error) { console.error(error); return; }
+  clients = data || [];
+  renderClients();
+  renderSubmenu();
+}
+
+/* ── RENDER CLIENTS GRID ── */
+function renderClients(filter='') {
+  const grid = document.getElementById('clients-grid');
+  let list = clients;
+  if (filter) list = clients.filter(c => (c.trainee?.full_name||'').toLowerCase().includes(filter.toLowerCase()));
+
+  if (list.length === 0) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+      <h3>No clients yet</h3>
+      <p>Add a trainee using their User ID</p>
+      <button class="btn btn-orange btn-sm" onclick="openAddModal()">+ Add client</button>
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = list.map(c => {
+    const name = c.trainee?.full_name || 'Unknown';
+    const initials = name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+    return `
+    <div class="client-card" data-id="${c.trainee_id}">
+      <div class="client-card-top">
+        <div class="client-avatar">${initials}</div>
+        <div class="client-name">${name}</div>
+        <span class="badge badge-${c.tag}">${c.tag}</span>
+      </div>
+      <div class="client-card-body">
+        <div class="stat-row"><span class="stat-label">Weight</span><span class="stat-val">${c.weight||'N/A'}</span></div>
+        <div class="stat-row"><span class="stat-label">Goal</span><span class="stat-val" style="font-size:11px">${c.goal||'—'}</span></div>
+        <div class="stat-row" style="margin-top:.5rem"><span class="stat-label">Progress</span><span class="stat-val" style="color:var(--orange)">${c.progress||0}%</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:0%" data-w="${c.progress||0}"></div></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  grid.querySelectorAll('.client-card').forEach(card => {
+    card.addEventListener('click', () => openClient(card.getAttribute('data-id')));
+  });
+  setTimeout(() => {
+    grid.querySelectorAll('.progress-fill').forEach(el => { el.style.width = el.getAttribute('data-w') + '%'; });
+  }, 50);
+}
+
+function renderSubmenu() {
+  const sub = document.getElementById('clients-submenu');
+  sub.innerHTML = clients.map(c => {
+    const name = c.trainee?.full_name || 'Unknown';
+    return `<div class="sidebar-sub" data-client-id="${c.trainee_id}">${name}</div>`;
+  }).join('');
+  sub.querySelectorAll('.sidebar-sub').forEach(el => {
+    el.addEventListener('click', () => openClient(el.getAttribute('data-client-id')));
+  });
+}
+
+document.getElementById('client-search').addEventListener('input', e => renderClients(e.target.value));
+
+/* ── OPEN CLIENT DETAIL ── */
+async function openClient(traineeId) {
+  currentClientId = traineeId;
+  const rel = clients.find(c => c.trainee_id === traineeId);
+  if (!rel) return;
+  const name = rel.trainee?.full_name || 'Unknown';
+  const initials = name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+
+  document.getElementById('detail-initials').textContent = initials;
+  document.getElementById('detail-av').textContent = initials;
+  document.getElementById('detail-name').textContent = name;
+  document.getElementById('detail-meta').textContent = `Weight: ${rel.weight||'N/A'} · Goal: ${rel.goal||'—'}`;
+  document.getElementById('breadcrumb-name').textContent = name;
+  document.getElementById('cf-name').value = name;
+  document.getElementById('cf-weight').value = rel.weight || '';
+  document.getElementById('cf-goal').value = rel.goal || '';
+  document.getElementById('cf-sessions').value = rel.weekly_sessions || '';
+  document.getElementById('cf-notes').value = rel.notes || '';
+  document.getElementById('cf-progress').value = rel.progress || 0;
+  document.getElementById('cf-tag').value = rel.tag || 'new';
+  updateProgressDisplay(rel.progress || 0);
+
+  document.querySelectorAll('.sidebar-sub').forEach(el => {
+    el.classList.toggle('active', el.getAttribute('data-client-id') === traineeId);
+  });
+
+  switchDetailTab('profile');
+  setSection('client-detail');
+}
+
+document.getElementById('cf-progress').addEventListener('input', e => updateProgressDisplay(e.target.value));
+function updateProgressDisplay(v) {
+  document.getElementById('progress-label').textContent = v + '%';
+  document.getElementById('progress-val-display').textContent = v + '%';
+}
+
+document.getElementById('save-client-btn').addEventListener('click', async () => {
+  if (!currentClientId) return;
+  const updates = {
+    weight: document.getElementById('cf-weight').value.trim(),
+    goal: document.getElementById('cf-goal').value.trim(),
+    weekly_sessions: document.getElementById('cf-sessions').value.trim(),
+    notes: document.getElementById('cf-notes').value.trim(),
+    progress: parseInt(document.getElementById('cf-progress').value) || 0,
+    tag: document.getElementById('cf-tag').value
+  };
+  const { error } = await sb.from('coach_clients').update(updates)
+    .eq('coach_id', currentUser.id).eq('trainee_id', currentClientId);
+  if (error) showToast('Error: ' + error.message);
+  else {
+    const idx = clients.findIndex(c => c.trainee_id === currentClientId);
+    if (idx !== -1) clients[idx] = { ...clients[idx], ...updates };
+    showToast('Client saved ✓');
+  }
+});
+
+/* ── PLAN EDITOR ── */
+function renderPlanEditor(containerId, days) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  (days || []).forEach((day, di) => {
+    container.appendChild(buildDayBlock(containerId, day.day_label, day.items, di));
+  });
+}
+
+function buildDayBlock(editorId, label='', items=[], dayIndex) {
+  const div = document.createElement('div');
+  div.className = 'plan-editor-day';
+  div.dataset.dayIndex = dayIndex;
+
+  div.innerHTML = `
+    <div class="plan-editor-day-header">
+      <input type="text" class="day-label-input" value="${label}" placeholder="Day label (e.g. Monday)" style="background:transparent;border:none;border-bottom:1px solid var(--border-col);color:var(--text);font-size:0.85rem;font-weight:700;outline:none;padding:0.2rem 0;color:var(--orange);width:180px;font-family:var(--font-body)"/>
+      <button class="plan-item-del remove-day-btn" title="Remove day">🗑</button>
+    </div>
+    <div class="items-container">${items.map(i=>`
+      <div class="plan-item-row">
+        <input type="text" class="item-input" value="${i}" placeholder="Exercise or meal..."/>
+        <button class="plan-item-del remove-item-btn">✕</button>
+      </div>`).join('')}
+    </div>
+    <button class="btn-add-item add-item-btn">+ Add item</button>`;
+
+  div.querySelector('.remove-day-btn').addEventListener('click', () => div.remove());
+  div.querySelector('.add-item-btn').addEventListener('click', () => {
+    const row = document.createElement('div');
+    row.className = 'plan-item-row';
+    row.innerHTML = `<input type="text" class="item-input" placeholder="Exercise or meal..."/><button class="plan-item-del remove-item-btn">✕</button>`;
+    row.querySelector('.remove-item-btn').addEventListener('click', () => row.remove());
+    div.querySelector('.items-container').appendChild(row);
+    row.querySelector('input').focus();
+  });
+  div.querySelectorAll('.remove-item-btn').forEach(btn => btn.addEventListener('click', () => btn.parentElement.remove()));
+
+  return div;
+}
+
+function addDay(editorId) {
+  const container = document.getElementById(editorId);
+  const dayNum = container.querySelectorAll('.plan-editor-day').length + 1;
+  container.appendChild(buildDayBlock(editorId, 'Day ' + dayNum, [], dayNum - 1));
+}
+
+function getPlanFromEditor(editorId) {
+  return Array.from(document.getElementById(editorId).querySelectorAll('.plan-editor-day')).map((d, i) => ({
+    day_label: d.querySelector('.day-label-input').value.trim() || ('Day ' + (i+1)),
+    items: Array.from(d.querySelectorAll('.item-input')).map(inp => inp.value.trim()).filter(Boolean),
+    sort_order: i
+  }));
+}
+
+document.getElementById('add-workout-day').addEventListener('click', () => addDay('workout-editor'));
+document.getElementById('add-diet-day').addEventListener('click', () => addDay('diet-editor'));
+
+document.getElementById('save-workout-btn').addEventListener('click', async () => savePlan('workout'));
+document.getElementById('save-diet-btn').addEventListener('click', async () => savePlan('diet'));
+
+async function savePlan(type) {
+  if (!currentClientId) return;
+  const table = type === 'workout' ? 'workout_plans' : 'diet_plans';
+  const editorId = type === 'workout' ? 'workout-editor' : 'diet-editor';
+  const days = getPlanFromEditor(editorId);
+
+  // Delete existing rows for this coach+trainee pair, then insert fresh
+  await sb.from(table).delete().eq('coach_id', currentUser.id).eq('trainee_id', currentClientId);
+  if (days.length > 0) {
+    const rows = days.map(d => ({
+      coach_id: currentUser.id,
+      trainee_id: currentClientId,
+      day_label: d.day_label,
+      items: d.items,
+      sort_order: d.sort_order
+    }));
+    const { error } = await sb.from(table).insert(rows);
+    if (error) { showToast('Error: ' + error.message); return; }
+  }
+  showToast((type === 'workout' ? 'Workout' : 'Diet') + ' plan saved ✓');
+}
+
+async function loadPlansForClient(traineeId) {
+  const [{ data: workout }, { data: diet }] = await Promise.all([
+    sb.from('workout_plans').select('*').eq('coach_id', currentUser.id).eq('trainee_id', traineeId).order('sort_order'),
+    sb.from('diet_plans').select('*').eq('coach_id', currentUser.id).eq('trainee_id', traineeId).order('sort_order')
+  ]);
+  renderPlanEditor('workout-editor', workout || []);
+  renderPlanEditor('diet-editor', diet || []);
+}
+
+/* ── DETAIL TABS ── */
+function switchDetailTab(tabName) {
+  ['profile','workout','diet'].forEach(t => {
+    document.getElementById('client-'+t+'-tab').classList.toggle('hidden', t !== tabName);
+  });
+  document.querySelectorAll('#detail-tabs .dash-tab').forEach(t => {
+    t.classList.toggle('active', t.getAttribute('data-tab') === tabName);
+  });
+  if (tabName === 'workout' || tabName === 'diet') loadPlansForClient(currentClientId);
+}
+document.querySelectorAll('#detail-tabs .dash-tab').forEach(tab => {
+  tab.addEventListener('click', () => switchDetailTab(tab.getAttribute('data-tab')));
+});
+
+/* ── SECTION NAVIGATION ── */
+function setSection(secId) {
+  ['profile','clients','client-detail'].forEach(s => {
+    document.getElementById('section-'+s).classList.add('hidden');
+  });
+  document.getElementById('section-'+secId).classList.remove('hidden');
+  document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+  if (secId === 'profile') document.getElementById('menu-item-profile').classList.add('active');
+  else if (secId === 'clients') { document.getElementById('menu-item-clients').classList.add('active'); renderClients(document.getElementById('client-search').value); }
+}
+
+document.getElementById('menu-item-profile').addEventListener('click', () => setSection('profile'));
+document.getElementById('menu-item-clients').addEventListener('click', () => setSection('clients'));
+document.querySelectorAll('.tab-trigger-clients').forEach(el => el.addEventListener('click', () => setSection('clients')));
+document.querySelectorAll('.tab-trigger-profile').forEach(el => el.addEventListener('click', () => setSection('profile')));
+document.getElementById('detail-back-btn').addEventListener('click', () => setSection('clients'));
+document.getElementById('header-add-client-btn').addEventListener('click', openAddModal);
+
+/* ── ADD CLIENT MODAL ── */
+function openAddModal() {
+  document.getElementById('add-trainee-id').value = '';
+  document.getElementById('add-goal').value = '';
+  document.getElementById('add-weight').value = '';
+  document.getElementById('add-notes').value = '';
+  document.getElementById('trainee-preview').style.display = 'none';
+  document.getElementById('add-client-modal').classList.add('open');
+}
+
+let lookupTimeout;
+document.getElementById('add-trainee-id').addEventListener('input', e => {
+  clearTimeout(lookupTimeout);
+  const id = e.target.value.trim();
+  if (id.length < 10) { document.getElementById('trainee-preview').style.display = 'none'; return; }
+  lookupTimeout = setTimeout(async () => {
+    const { data } = await sb.from('profiles').select('full_name,email,role').eq('id', id).single();
+    if (data && data.role === 'trainee') {
+      document.getElementById('trainee-preview-name').textContent = data.full_name || '—';
+      document.getElementById('trainee-preview-email').textContent = data.email;
+      document.getElementById('trainee-preview').style.display = 'block';
+    } else {
+      document.getElementById('trainee-preview').style.display = 'none';
+    }
+  }, 500);
+});
+
+document.getElementById('add-modal-close').addEventListener('click', () => document.getElementById('add-client-modal').classList.remove('open'));
+document.getElementById('add-modal-cancel').addEventListener('click', () => document.getElementById('add-client-modal').classList.remove('open'));
+
+document.getElementById('confirm-add-client-btn').addEventListener('click', async () => {
+  const traineeId = document.getElementById('add-trainee-id').value.trim();
+  if (!traineeId) { showToast('Enter a trainee User ID'); return; }
+
+  // Verify trainee exists
+  const { data: traineeProfile } = await sb.from('profiles').select('id,full_name,email,role').eq('id', traineeId).single();
+  if (!traineeProfile) { showToast('No user found with that ID'); return; }
+  if (traineeProfile.role !== 'trainee') { showToast('That user is not a trainee'); return; }
+
+  const newRel = {
+    coach_id: currentUser.id,
+    trainee_id: traineeId,
+    goal: document.getElementById('add-goal').value.trim(),
+    weight: document.getElementById('add-weight').value.trim(),
+    notes: document.getElementById('add-notes').value.trim(),
+    tag: 'new',
+    progress: 0
+  };
+  const { error } = await sb.from('coach_clients').insert(newRel);
+  if (error) { showToast(error.code === '23505' ? 'Already on your roster' : error.message); return; }
+
+  document.getElementById('add-client-modal').classList.remove('open');
+  await loadClients();
+  setSection('clients');
+  showToast(traineeProfile.full_name + ' added ✓');
+});
+
+/* ── SIDEBAR / THEME / NAV ── */
+document.getElementById('themeToggle').addEventListener('click', () => {
+  const t = document.documentElement.getAttribute('data-theme');
+  document.documentElement.setAttribute('data-theme', t === 'dark' ? 'light' : 'dark');
+});
+document.querySelectorAll('.toggle-sidebar-trigger').forEach(btn => {
+  btn.addEventListener('click', () => document.getElementById('dash-layout').classList.toggle('sidebar-collapsed'));
+});
+const navMenu = document.getElementById('navDropdownMenu');
+const menuBtn = document.getElementById('menu-toggle-btn');
+menuBtn.addEventListener('click', e => { e.stopPropagation(); const o=navMenu.classList.toggle('show'); menuBtn.setAttribute('aria-expanded',String(o)); });
+navMenu.addEventListener('click', e => e.stopPropagation());
+window.addEventListener('click', () => navMenu.classList.remove('show'));
+document.getElementById('calorie-feature-btn').addEventListener('click', e => { e.preventDefault(); alert('Calorie Calculator — $4.99/mo add-on'); navMenu.classList.remove('show'); });
+document.getElementById('signout-btn').addEventListener('click', async e => { e.preventDefault(); await sb.auth.signOut(); window.location.href = 'auth.html'; });
+document.getElementById('nav-logo').addEventListener('click', () => { window.location.href = 'index.html'; });
+
+/* ── TOAST ── */
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+</script>
+</body>
+</html>

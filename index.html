@@ -1,13 +1,69 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Google AI Studio App</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>T-0</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
 
+  <nav>
+    <div class="nav-left-group">
+      <div class="logo" id="nav-logo">T-0</div>
+    </div>
+    <div class="nav-right">
+      <div class="nav-dropdown-container">
+        <button type="button" class="nav-sidebar-toggle" id="menu-toggle-btn" aria-controls="navDropdownMenu" aria-expanded="false" aria-label="Open features menu">
+          <span class="bar"></span>
+          <span class="bar"></span>
+          <span class="bar"></span>
+        </button>
+        <div class="nav-dropdown-menu" id="navDropdownMenu">
+          <div class="dropdown-item-header">Features & Add-ons</div>
+          <a href="#" class="dropdown-item" id="calorie-feature-btn">
+            <span class="item-icon">🔥</span>
+            <div class="item-text">
+              <div class="item-title">Calorie Calculator</div>
+              <div class="item-desc">Premium Feature Add-on</div>
+            </div>
+            <span class="item-price">$4.99</span>
+          </a>
+        </div>
+      </div>
+      <button type="button" class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode"></button>
+    </div>
+  </nav>
+
+  <div id="page-landing" class="page active">
+    <div class="hero">
+      <div class="hero-bg-grid"></div>
+      <div class="glow-orb orb1"></div>
+      <div class="glow-orb orb2"></div>
+      <div class="glow-orb orb3"></div>
+      <h1><span class="line1">Start your journey</span></h1>
+      <div class="hero-btns">
+        <button type="button" class="btn btn-yellow hero-btn-custom" id="landing-start-btn">start for free</button>
+        <button type="button" class="btn btn-outline hero-btn-custom" id="landing-login-btn">Log in</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('landing-start-btn').addEventListener('click', () => window.location.href = 'auth.html');
+    document.getElementById('landing-login-btn').addEventListener('click', () => window.location.href = 'auth.html');
+    document.getElementById('themeToggle').addEventListener('click', () => {
+      const t = document.documentElement.getAttribute('data-theme');
+      document.documentElement.setAttribute('data-theme', t === 'dark' ? 'light' : 'dark');
+    });
+    const navMenu = document.getElementById('navDropdownMenu');
+    const menuBtn = document.getElementById('menu-toggle-btn');
+    menuBtn.addEventListener('click', e => { e.stopPropagation(); const o=navMenu.classList.toggle('show'); menuBtn.setAttribute('aria-expanded',String(o)); });
+    navMenu.addEventListener('click', e => e.stopPropagation());
+    window.addEventListener('click', () => navMenu.classList.remove('show'));
+    document.getElementById('calorie-feature-btn').addEventListener('click', e => { e.preventDefault(); alert('Calorie Calculator — $4.99/mo add-on'); });
+    document.getElementById('nav-logo').addEventListener('click', () => window.location.href = 'index.html');
+  </script>
+</body>
+</html>
