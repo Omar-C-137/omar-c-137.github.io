@@ -573,12 +573,17 @@ async function savePlan(type) {
   const editorId = type === 'workout' ? 'workout-editor' : 'diet-editor';
   const days = getPlanFromEditor(editorId);
 
-  // Delete existing rows for this coach+trainee pair, then insert fresh
-  await sb.from(table).delete().eq('coach_id', currentUser.id).eq('trainee_id', currentClientId);
+  // Delete existing coach-owned rows for this coach+trainee pair, then insert fresh coach rows
+  await sb.from(table)
+    .delete()
+    .eq('coach_id', currentUser.id)
+    .eq('trainee_id', currentClientId)
+    .eq('created_by', 'coach');
   if (days.length > 0) {
     const rows = days.map(d => ({
       coach_id: currentUser.id,
       trainee_id: currentClientId,
+      created_by: 'coach',
       day_label: d.day_label,
       items: d.items,
       sort_order: d.sort_order
@@ -591,8 +596,8 @@ async function savePlan(type) {
 
 async function loadPlansForClient(traineeId) {
   const [{ data: workout }, { data: diet }] = await Promise.all([
-    sb.from('workout_plans').select('*').eq('coach_id', currentUser.id).eq('trainee_id', traineeId).order('sort_order'),
-    sb.from('diet_plans').select('*').eq('coach_id', currentUser.id).eq('trainee_id', traineeId).order('sort_order')
+    sb.from('workout_plans').select('*').eq('coach_id', currentUser.id).eq('trainee_id', traineeId).eq('created_by', 'coach').order('sort_order'),
+    sb.from('diet_plans').select('*').eq('coach_id', currentUser.id).eq('trainee_id', traineeId).eq('created_by', 'coach').order('sort_order')
   ]);
   renderPlanEditor('workout-editor', workout || []);
   renderPlanEditor('diet-editor', diet || []);

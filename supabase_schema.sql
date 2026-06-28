@@ -34,8 +34,9 @@ create table if not exists public.coach_clients (
 -- 3. WORKOUT PLANS  (coach writes for a trainee)
 create table if not exists public.workout_plans (
   id          uuid primary key default gen_random_uuid(),
-  coach_id    uuid not null references public.profiles(id) on delete cascade,
+  coach_id    uuid references public.profiles(id) on delete cascade,
   trainee_id  uuid not null references public.profiles(id) on delete cascade,
+  created_by  text not null default 'coach' check (created_by in ('coach','trainee')),
   day_label   text not null,   -- e.g. "Monday", "Day 1"
   items       text[] not null, -- array of exercise strings
   sort_order  integer default 0,
@@ -45,17 +46,43 @@ create table if not exists public.workout_plans (
 -- 4. DIET PLANS  (coach writes for a trainee)
 create table if not exists public.diet_plans (
   id          uuid primary key default gen_random_uuid(),
-  coach_id    uuid not null references public.profiles(id) on delete cascade,
+  coach_id    uuid references public.profiles(id) on delete cascade,
   trainee_id  uuid not null references public.profiles(id) on delete cascade,
+  created_by  text not null default 'coach' check (created_by in ('coach','trainee')),
   day_label   text not null,
   items       text[] not null,
   sort_order  integer default 0,
   created_at  timestamptz default now()
 );
 
--- ══════════════════════════════════════════════════════
+-- SAFELY ALTER EXISTING TABLES TO SUPPORT LOCAL COPIES
+alter table if exists public.workout_plans
+  alter column coach_id drop not null;
+alter table if exists public.workout_plans
+  add column if not exists created_by text not null default 'coach';
+
+alter table if exists public.diet_plans
+  alter column coach_id drop not null;
+alter table if exists public.diet_plans
+  add column if not exists created_by text not null default 'coach';
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'workout_plans_created_by_check'
+  ) THEN
+    ALTER TABLE public.workout_plans ADD CONSTRAINT workout_plans_created_by_check CHECK (created_by in ('coach','trainee'));
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'diet_plans_created_by_check'
+  ) THEN
+    ALTER TABLE public.diet_plans ADD CONSTRAINT diet_plans_created_by_check CHECK (created_by in ('coach','trainee'));
+  END IF;
+END$$;
+
+-- ══════════════════════════════════════════════════════════════════════
 --  ROW LEVEL SECURITY
--- ══════════════════════════════════════════════════════
+-- ══════════════════════════════════════════════
 
 alter table public.profiles        enable row level security;
 alter table public.coach_clients   enable row level security;
@@ -85,17 +112,47 @@ create policy "Trainee views their own coach relationships"
 
 -- WORKOUT_PLANS policies
 create policy "Coach manages workout plans"
-  on public.workout_plans for all using (auth.uid() = coach_id);
+  on public.workout_plans for all
+  using (auth.uid() = coach_id and created_by = 'coach')
+  with check (auth.uid() = coach_id and created_by = 'coach');
 
 create policy "Trainee reads own workout plans"
   on public.workout_plans for select using (auth.uid() = trainee_id);
 
+create policy "Trainee manages own workout copies"
+  on public.workout_plans for all
+  using (auth.uid() = trainee_id and created_by = 'trainee')
+  with check (
+    auth.uid() = trainee_id and created_by = 'trainee' and (
+      coach_id is null
+      or coach_id = auth.uid()
+      or coach_id = (
+        select coach_id from public.coach_clients where trainee_id = auth.uid() limit 1
+      )
+    )
+  );
+
 -- DIET_PLANS policies
 create policy "Coach manages diet plans"
-  on public.diet_plans for all using (auth.uid() = coach_id);
+  on public.diet_plans for all
+  using (auth.uid() = coach_id and created_by = 'coach')
+  with check (auth.uid() = coach_id and created_by = 'coach');
 
 create policy "Trainee reads own diet plans"
   on public.diet_plans for select using (auth.uid() = trainee_id);
+
+create policy "Trainee manages own diet copies"
+  on public.diet_plans for all
+  using (auth.uid() = trainee_id and created_by = 'trainee')
+  with check (
+    auth.uid() = trainee_id and created_by = 'trainee' and (
+      coach_id is null
+      or coach_id = auth.uid()
+      or coach_id = (
+        select coach_id from public.coach_clients where trainee_id = auth.uid() limit 1
+      )
+    )
+  );
 
 -- ══════════════════════════════════════════════════════
 --  AUTO-CREATE PROFILE ON SIGNUP  (Supabase Function)
