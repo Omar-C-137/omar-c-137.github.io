@@ -6,6 +6,9 @@
   <title>T-0 — Coach Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="style.css"/>
+  <script>
+    (function(){ const t=localStorage.getItem('t0-theme'); if(t) document.documentElement.setAttribute('data-theme',t); })();
+  </script>
   <style>
     /* ── COACH EXTRA STYLES ── */
     .user-id-chip {
@@ -515,6 +518,29 @@ function renderPlanEditor(containerId, days) {
   });
 }
 
+function buildExerciseRow(item={}) {
+  // item can be a string (legacy) or {name, sets, reps}
+  let name='', sets='', reps='';
+  if (typeof item === 'string') {
+    // Parse legacy "Exercise - 3 sets x 10 reps" or just "Exercise"
+    const match = item.match(/^(.+?)\s*-\s*(\d+)\s*[sx]\s*(\d+)/i);
+    if (match) { name=match[1].trim(); sets=match[2]; reps=match[3]; }
+    else { name=item; }
+  } else {
+    name=item.name||''; sets=item.sets||''; reps=item.reps||'';
+  }
+  const row = document.createElement('div');
+  row.className = 'plan-item-row exercise-item-row';
+  row.innerHTML = `
+    <input type="text" class="item-name" value="${name}" placeholder="Exercise name" style="flex:2"/>
+    <input type="text" class="item-sets" value="${sets}" placeholder="Sets" style="flex:0.6;text-align:center"/>
+    <span style="color:var(--text-sec);font-size:0.8rem;white-space:nowrap">×</span>
+    <input type="text" class="item-reps" value="${reps}" placeholder="Reps" style="flex:0.6;text-align:center"/>
+    <button class="plan-item-del remove-item-btn" title="Remove">✕</button>`;
+  row.querySelector('.remove-item-btn').addEventListener('click', () => row.remove());
+  return row;
+}
+
 function buildDayBlock(editorId, label='', items=[], dayIndex) {
   const div = document.createElement('div');
   div.className = 'plan-editor-day';
@@ -522,27 +548,24 @@ function buildDayBlock(editorId, label='', items=[], dayIndex) {
 
   div.innerHTML = `
     <div class="plan-editor-day-header">
-      <input type="text" class="day-label-input" value="${label}" placeholder="Day label (e.g. Monday)" style="background:transparent;border:none;border-bottom:1px solid var(--border-col);color:var(--text);font-size:0.85rem;font-weight:700;outline:none;padding:0.2rem 0;color:var(--orange);width:180px;font-family:var(--font-body)"/>
+      <input type="text" class="day-label-input" value="${label}" placeholder="Day label (e.g. Monday)" style="background:transparent;border:none;border-bottom:1px solid var(--border-col);color:var(--orange);font-size:0.85rem;font-weight:700;outline:none;padding:0.2rem 0;width:180px;font-family:var(--font-body)"/>
       <button class="plan-item-del remove-day-btn" title="Remove day">🗑</button>
     </div>
-    <div class="items-container">${items.map(i=>`
-      <div class="plan-item-row">
-        <input type="text" class="item-input" value="${i}" placeholder="Exercise or meal..."/>
-        <button class="plan-item-del remove-item-btn">✕</button>
-      </div>`).join('')}
+    <div style="display:grid;grid-template-columns:2fr 0.6fr 12px 0.6fr 28px;gap:0.4rem;padding:0 0 0.4rem;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-sec)">
+      <span>Exercise</span><span style="text-align:center">Sets</span><span></span><span style="text-align:center">Reps</span><span></span>
     </div>
-    <button class="btn-add-item add-item-btn">+ Add item</button>`;
+    <div class="items-container"></div>
+    <button class="btn-add-item add-item-btn" style="margin-top:0.5rem">+ Add exercise</button>`;
+
+  const container = div.querySelector('.items-container');
+  (items||[]).forEach(i => container.appendChild(buildExerciseRow(i)));
 
   div.querySelector('.remove-day-btn').addEventListener('click', () => div.remove());
   div.querySelector('.add-item-btn').addEventListener('click', () => {
-    const row = document.createElement('div');
-    row.className = 'plan-item-row';
-    row.innerHTML = `<input type="text" class="item-input" placeholder="Exercise or meal..."/><button class="plan-item-del remove-item-btn">✕</button>`;
-    row.querySelector('.remove-item-btn').addEventListener('click', () => row.remove());
-    div.querySelector('.items-container').appendChild(row);
-    row.querySelector('input').focus();
+    const row = buildExerciseRow();
+    container.appendChild(row);
+    row.querySelector('.item-name').focus();
   });
-  div.querySelectorAll('.remove-item-btn').forEach(btn => btn.addEventListener('click', () => btn.parentElement.remove()));
 
   return div;
 }
@@ -556,7 +579,11 @@ function addDay(editorId) {
 function getPlanFromEditor(editorId) {
   return Array.from(document.getElementById(editorId).querySelectorAll('.plan-editor-day')).map((d, i) => ({
     day_label: d.querySelector('.day-label-input').value.trim() || ('Day ' + (i+1)),
-    items: Array.from(d.querySelectorAll('.item-input')).map(inp => inp.value.trim()).filter(Boolean),
+    items: Array.from(d.querySelectorAll('.exercise-item-row')).map(row => ({
+      name: row.querySelector('.item-name')?.value.trim() || '',
+      sets: row.querySelector('.item-sets')?.value.trim() || '',
+      reps: row.querySelector('.item-reps')?.value.trim() || ''
+    })).filter(item => item.name),
     sort_order: i
   }));
 }
@@ -695,7 +722,9 @@ document.getElementById('confirm-add-client-btn').addEventListener('click', asyn
 /* ── SIDEBAR / THEME / NAV ── */
 document.getElementById('themeToggle').addEventListener('click', () => {
   const t = document.documentElement.getAttribute('data-theme');
-  document.documentElement.setAttribute('data-theme', t === 'dark' ? 'light' : 'dark');
+  const next = t === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('t0-theme', next);
 });
 document.querySelectorAll('.toggle-sidebar-trigger').forEach(btn => {
   btn.addEventListener('click', () => document.getElementById('dash-layout').classList.toggle('sidebar-collapsed'));

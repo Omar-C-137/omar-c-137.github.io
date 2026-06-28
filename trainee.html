@@ -6,6 +6,9 @@
   <title>T-0 — My Training</title>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="style.css"/>
+  <script>
+    (function(){ const t=localStorage.getItem('t0-theme'); if(t) document.documentElement.setAttribute('data-theme',t); })();
+  </script>
   <style>
     /* ── TRAINEE EXTRA ── */
     .user-id-chip {
@@ -92,6 +95,19 @@
     }
 
     .no-plan { text-align:center; color:var(--text-sec); padding:2rem; font-size:0.85rem; }
+
+    /* Self-plan editor (mirrors coach editor) */
+    .btn-add-day { background:transparent; border:1px dashed var(--border-col); color:var(--text-sec); padding:0.6rem 1.2rem; border-radius:4px; font-size:0.85rem; cursor:pointer; font-family:var(--font-body); width:100%; margin-bottom:1rem; transition:all 0.2s; }
+    .btn-add-day:hover { border-color:var(--orange); color:var(--orange); }
+    .btn-add-item { background:transparent; border:1px dashed var(--border-col); color:var(--text-sec); padding:0.45rem 0.9rem; border-radius:4px; font-size:0.8rem; cursor:pointer; font-family:var(--font-body); transition:all 0.2s; }
+    .btn-add-item:hover { border-color:var(--orange); color:var(--orange); }
+    .plan-editor-day { background:var(--card-bg); border:1px solid var(--border-col); border-radius:6px; padding:1rem; margin-bottom:0.75rem; }
+    .plan-editor-day-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:0.75rem; }
+    .plan-item-row { display:flex; align-items:center; gap:0.5rem; margin-bottom:0.4rem; }
+    .plan-item-row input { background:var(--input-bg); border:1px solid var(--input-border); color:var(--text); padding:0.5rem 0.75rem; border-radius:4px; font-family:var(--font-body); font-size:0.85rem; outline:none; }
+    .plan-item-row input:focus { border-color:var(--orange); }
+    .plan-item-del { background:transparent; border:none; color:var(--text-sec); cursor:pointer; font-size:1rem; padding:0.3rem; }
+    .plan-item-del:hover { color:#ff6b7a; }
 
     /* Sidebar role badge */
     .role-badge { display:inline-block; background:rgba(255,107,43,0.12); color:var(--orange); font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; padding:0.15rem 0.5rem; border-radius:3px; }
@@ -230,19 +246,55 @@
       <!-- WORKOUT SECTION -->
       <div id="section-workout" class="hidden">
         <div style="margin-bottom:1.5rem;">
-          <h2 style="font-size:1.25rem;font-weight:700;">My Workout Plan</h2>
-          <p style="font-size:0.85rem;color:var(--text-sec);margin-top:0.25rem;">Assigned by your coach — read only</p>
+          <h2 style="font-size:1.25rem;font-weight:700;">Workout Plan</h2>
         </div>
-        <div id="workout-plan-container"></div>
+        <div class="dash-tabs" id="workout-tabs">
+          <div class="dash-tab active" data-plan-tab="coach" data-plan-type="workout">Coach Plan</div>
+          <div class="dash-tab" data-plan-tab="mine" data-plan-type="workout">My Plan</div>
+        </div>
+
+        <!-- Coach workout plan (read-only) -->
+        <div id="workout-coach-view">
+          <p style="font-size:0.82rem;color:var(--text-sec);margin-bottom:1.25rem;">Assigned by your coach — read only</p>
+          <div id="workout-plan-container"></div>
+        </div>
+
+        <!-- Trainee self workout plan (editable) -->
+        <div id="workout-mine-view" class="hidden">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
+            <p style="font-size:0.82rem;color:var(--text-sec);">Your personal workout plan</p>
+            <button class="btn btn-orange btn-sm" id="save-my-workout-btn">Save plan</button>
+          </div>
+          <div id="my-workout-editor"></div>
+          <button class="btn-add-day" id="add-my-workout-day">+ Add day</button>
+        </div>
       </div>
 
       <!-- DIET SECTION -->
       <div id="section-diet" class="hidden">
         <div style="margin-bottom:1.5rem;">
-          <h2 style="font-size:1.25rem;font-weight:700;">My Diet Plan</h2>
-          <p style="font-size:0.85rem;color:var(--text-sec);margin-top:0.25rem;">Assigned by your coach — read only</p>
+          <h2 style="font-size:1.25rem;font-weight:700;">Diet Plan</h2>
         </div>
-        <div id="diet-plan-container"></div>
+        <div class="dash-tabs" id="diet-tabs">
+          <div class="dash-tab active" data-plan-tab="coach" data-plan-type="diet">Coach Plan</div>
+          <div class="dash-tab" data-plan-tab="mine" data-plan-type="diet">My Plan</div>
+        </div>
+
+        <!-- Coach diet plan (read-only) -->
+        <div id="diet-coach-view">
+          <p style="font-size:0.82rem;color:var(--text-sec);margin-bottom:1.25rem;">Assigned by your coach — read only</p>
+          <div id="diet-plan-container"></div>
+        </div>
+
+        <!-- Trainee self diet plan (editable) -->
+        <div id="diet-mine-view" class="hidden">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
+            <p style="font-size:0.82rem;color:var(--text-sec);">Your personal diet plan</p>
+            <button class="btn btn-orange btn-sm" id="save-my-diet-btn">Save plan</button>
+          </div>
+          <div id="my-diet-editor"></div>
+          <button class="btn-add-day" id="add-my-diet-day">+ Add day</button>
+        </div>
       </div>
     </div>
   </div>
@@ -346,10 +398,11 @@ async function loadRelationship() {
   document.getElementById('stat-sessions').textContent = data.weekly_sessions ? data.weekly_sessions + 'x' : '—';
 }
 
-/* ── RENDER PLAN (CARDS)[cite: 1] ── */
+/* ── RENDER COACH PLAN (CARDS) ── */
 async function loadAndRenderPlan(type) {
+  const container = document.getElementById(type + '-plan-container');
+
   if (!relationship) {
-    const container = document.getElementById(type + '-plan-container');
     container.innerHTML = `<div class="no-plan">No coach linked yet. Ask your coach to add you.</div>`;
     return;
   }
@@ -359,15 +412,14 @@ async function loadAndRenderPlan(type) {
     .select('*')
     .eq('trainee_id', currentUser.id)
     .eq('coach_id', relationship.coach_id)
+    .eq('created_by', 'coach')
     .order('sort_order');
 
-  const container = document.getElementById(type + '-plan-container');
   if (!data || data.length === 0) {
     container.innerHTML = `<div class="no-plan">Your coach hasn't set a ${type} plan yet.</div>`;
     return;
   }
 
-  // Maps exercises out inside modern clean card wrappers dynamically[cite: 1]
   container.innerHTML = data.map(day => `
     <div class="plan-section">
       <div class="plan-section-header">
@@ -375,21 +427,150 @@ async function loadAndRenderPlan(type) {
       </div>
       <div class="plan-section-body">
         ${(day.items||[]).map(item => {
-          // If the item string contains structural hints like dynamic descriptions/reps split by dash, clean it up
-          const parts = item.split(' - ');
-          const title = parts[0];
-          const description = parts.slice(1).join(' - ') || 'Sets & Reps managed by coach.';
-          
+          // Support both structured {name,sets,reps} objects and legacy strings
+          let title, meta;
+          if (typeof item === 'object' && item !== null) {
+            title = item.name || 'Exercise';
+            const setPart = item.sets ? item.sets + ' sets' : '';
+            const repPart = item.reps ? item.reps + ' reps' : '';
+            meta = [setPart, repPart].filter(Boolean).join(' × ') || 'See coach for details';
+          } else {
+            const parts = String(item).split(' - ');
+            title = parts[0];
+            meta = parts.slice(1).join(' - ') || 'See coach for details';
+          }
           return `
             <div class="exercise-card">
               <div class="exercise-title">${title}</div>
-              <div class="exercise-meta">${description}</div>
-            </div>
-          `;
+              <div class="exercise-meta">${meta}</div>
+            </div>`;
         }).join('')}
       </div>
     </div>`).join('');
 }
+
+/* ── SELF-PLAN EDITOR ── */
+function buildSelfExerciseRow(item={}) {
+  let name='', sets='', reps='';
+  if (typeof item === 'string') {
+    const m = item.match(/^(.+?)\s*-\s*(\d+)\s*[sx]\s*(\d+)/i);
+    if (m) { name=m[1].trim(); sets=m[2]; reps=m[3]; } else { name=item; }
+  } else { name=item.name||''; sets=item.sets||''; reps=item.reps||''; }
+  const row = document.createElement('div');
+  row.className = 'plan-item-row exercise-item-row';
+  row.innerHTML = `
+    <input type="text" class="item-name" value="${name}" placeholder="Exercise name" style="flex:2"/>
+    <input type="text" class="item-sets" value="${sets}" placeholder="Sets" style="flex:0.6;text-align:center"/>
+    <span style="color:var(--text-sec);font-size:0.8rem;white-space:nowrap">×</span>
+    <input type="text" class="item-reps" value="${reps}" placeholder="Reps" style="flex:0.6;text-align:center"/>
+    <button class="plan-item-del remove-item-btn" title="Remove">✕</button>`;
+  row.querySelector('.remove-item-btn').addEventListener('click', () => row.remove());
+  return row;
+}
+
+function buildSelfDayBlock(label='', items=[], dayIndex) {
+  const div = document.createElement('div');
+  div.className = 'plan-editor-day';
+  div.innerHTML = `
+    <div class="plan-editor-day-header">
+      <input type="text" class="day-label-input" value="${label}" placeholder="Day label (e.g. Monday)" style="background:transparent;border:none;border-bottom:1px solid var(--border-col);color:var(--orange);font-size:0.85rem;font-weight:700;outline:none;padding:0.2rem 0;width:180px;font-family:var(--font-body)"/>
+      <button class="plan-item-del remove-day-btn" title="Remove day">🗑</button>
+    </div>
+    <div style="display:grid;grid-template-columns:2fr 0.6fr 12px 0.6fr 28px;gap:0.4rem;padding:0 0 0.4rem;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-sec)">
+      <span>Exercise</span><span style="text-align:center">Sets</span><span></span><span style="text-align:center">Reps</span><span></span>
+    </div>
+    <div class="items-container"></div>
+    <button class="btn-add-item add-item-btn" style="margin-top:0.5rem">+ Add exercise</button>`;
+  const container = div.querySelector('.items-container');
+  (items||[]).forEach(i => container.appendChild(buildSelfExerciseRow(i)));
+  div.querySelector('.remove-day-btn').addEventListener('click', () => div.remove());
+  div.querySelector('.add-item-btn').addEventListener('click', () => {
+    const row = buildSelfExerciseRow();
+    container.appendChild(row);
+    row.querySelector('.item-name').focus();
+  });
+  return div;
+}
+
+function renderSelfEditor(editorId, days) {
+  const c = document.getElementById(editorId);
+  c.innerHTML = '';
+  (days||[]).forEach((d,i) => c.appendChild(buildSelfDayBlock(d.day_label, d.items, i)));
+}
+
+function getSelfPlanFromEditor(editorId) {
+  return Array.from(document.getElementById(editorId).querySelectorAll('.plan-editor-day')).map((d,i) => ({
+    day_label: d.querySelector('.day-label-input').value.trim() || ('Day '+(i+1)),
+    items: Array.from(d.querySelectorAll('.exercise-item-row')).map(row => ({
+      name: row.querySelector('.item-name')?.value.trim()||'',
+      sets: row.querySelector('.item-sets')?.value.trim()||'',
+      reps: row.querySelector('.item-reps')?.value.trim()||''
+    })).filter(it=>it.name),
+    sort_order: i
+  }));
+}
+
+function addSelfDay(editorId) {
+  const c = document.getElementById(editorId);
+  const n = c.querySelectorAll('.plan-editor-day').length + 1;
+  c.appendChild(buildSelfDayBlock('Day '+n, [], n-1));
+}
+
+async function loadSelfPlan(type) {
+  const editorId = type === 'workout' ? 'my-workout-editor' : 'my-diet-editor';
+  const table = type === 'workout' ? 'workout_plans' : 'diet_plans';
+  const { data } = await sb.from(table)
+    .select('*')
+    .eq('trainee_id', currentUser.id)
+    .eq('created_by', 'trainee')
+    .order('sort_order');
+  renderSelfEditor(editorId, data || []);
+}
+
+async function saveSelfPlan(type) {
+  const table = type === 'workout' ? 'workout_plans' : 'diet_plans';
+  const editorId = type === 'workout' ? 'my-workout-editor' : 'my-diet-editor';
+  const days = getSelfPlanFromEditor(editorId);
+  await sb.from(table).delete().eq('trainee_id', currentUser.id).eq('created_by', 'trainee');
+  if (days.length > 0) {
+    const rows = days.map(d => ({
+      trainee_id: currentUser.id,
+      coach_id: currentUser.id, // required by schema; using own id for self-plans
+      created_by: 'trainee',
+      day_label: d.day_label,
+      items: d.items,
+      sort_order: d.sort_order
+    }));
+    const { error } = await sb.from(table).insert(rows);
+    if (error) { showToast('Error: ' + error.message); return; }
+  }
+  showToast((type==='workout'?'Workout':'Diet') + ' plan saved ✓');
+}
+
+document.getElementById('add-my-workout-day').addEventListener('click', () => addSelfDay('my-workout-editor'));
+document.getElementById('add-my-diet-day').addEventListener('click', () => addSelfDay('my-diet-editor'));
+document.getElementById('save-my-workout-btn').addEventListener('click', () => saveSelfPlan('workout'));
+document.getElementById('save-my-diet-btn').addEventListener('click', () => saveSelfPlan('diet'));
+
+/* Plan tab switching (Coach vs Mine) */
+let selfPlanLoaded = { workout: false, diet: false };
+document.querySelectorAll('[data-plan-tab]').forEach(tab => {
+  tab.addEventListener('click', () => {
+    const type = tab.getAttribute('data-plan-type');
+    const which = tab.getAttribute('data-plan-tab');
+    // Update tab active state
+    document.querySelectorAll(`[data-plan-type="${type}"]`).forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    // Show/hide views
+    document.getElementById(type+'-coach-view').classList.toggle('hidden', which !== 'coach');
+    document.getElementById(type+'-mine-view').classList.toggle('hidden', which !== 'mine');
+    // Load self plan lazily on first open
+    if (which === 'mine' && !selfPlanLoaded[type]) {
+      selfPlanLoaded[type] = true;
+      loadSelfPlan(type);
+    }
+  });
+});
 
 /* ── SECTION NAV ── */
 const sections = ['overview','profile','workout','diet'];
@@ -411,7 +592,9 @@ document.getElementById('menu-item-diet').addEventListener('click', () => setSec
 /* ── SIDEBAR / THEME / NAV ── */
 document.getElementById('themeToggle').addEventListener('click', () => {
   const t = document.documentElement.getAttribute('data-theme');
-  document.documentElement.setAttribute('data-theme', t === 'dark' ? 'light' : 'dark');
+  const next = t === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('t0-theme', next);
 });
 document.querySelectorAll('.toggle-sidebar-trigger').forEach(btn => {
   btn.addEventListener('click', () => document.getElementById('dash-layout').classList.toggle('sidebar-collapsed'));

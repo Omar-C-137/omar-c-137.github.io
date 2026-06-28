@@ -6,6 +6,10 @@
   <title>T-0</title>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="style.css"/>
+  <script>
+    // Apply saved theme before first paint to avoid flash
+    (function(){ const t=localStorage.getItem('t0-theme'); if(t) document.documentElement.setAttribute('data-theme',t); })();
+  </script>
 </head>
 <body>
 
@@ -53,9 +57,15 @@
   <script>
     document.getElementById('landing-start-btn').addEventListener('click', () => window.location.href = 'auth.html');
     document.getElementById('landing-login-btn').addEventListener('click', () => window.location.href = 'auth.html');
+    // Restore saved theme on load
+    const savedTheme = localStorage.getItem('t0-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+
     document.getElementById('themeToggle').addEventListener('click', () => {
       const t = document.documentElement.getAttribute('data-theme');
-      document.documentElement.setAttribute('data-theme', t === 'dark' ? 'light' : 'dark');
+      const next = t === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('t0-theme', next);
     });
     const navMenu = document.getElementById('navDropdownMenu');
     const menuBtn = document.getElementById('menu-toggle-btn');
