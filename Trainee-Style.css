@@ -1,4 +1,9 @@
-/* ── TRAINEE EXTRA ── */
+/* ════════════════════════════════════════════════
+   T-0  |  Trainee stylesheet
+   Extends style.css (global vars live there)
+════════════════════════════════════════════════ */
+
+/* ── USER ID CHIP ── */
 .user-id-chip {
   display:inline-flex; align-items:center; gap:0.5rem;
   background:rgba(255,107,43,0.08); border:1px solid rgba(255,107,43,0.2);
@@ -7,509 +12,376 @@
 }
 .user-id-chip:hover { border-color:var(--orange); color:var(--orange); }
 
-.toast { position:fixed; bottom:2rem; right:2rem; background:#1a1a1a; border:1px solid #333; color:var(--text); padding:0.75rem 1.25rem; border-radius:6px; font-size:0.85rem; z-index:999; transform:translateY(100px); opacity:0; transition:all 0.3s; }
+/* ── TOAST ── */
+.toast {
+  position:fixed; bottom:2rem; right:2rem; background:#1a1a1a;
+  border:1px solid #333; color:var(--text); padding:0.75rem 1.25rem;
+  border-radius:6px; font-size:0.85rem; z-index:999;
+  transform:translateY(100px); opacity:0; transition:all 0.3s;
+  box-shadow:0 8px 24px rgba(0,0,0,0.5);
+}
 .toast.show { transform:translateY(0); opacity:1; }
 
-.plan-read-only { pointer-events:none; }
+/* ── ROLE BADGE ── */
+.role-badge {
+  display:inline-block; background:rgba(255,107,43,0.12); color:var(--orange);
+  font-size:0.7rem; font-weight:700; text-transform:uppercase;
+  letter-spacing:0.5px; padding:0.15rem 0.5rem; border-radius:3px;
+}
 
-/* Coach info card */
+/* ── COACH CARD ── */
 .coach-card {
   background:var(--card-bg); border:1px solid var(--border-col);
-  border-radius:6px; padding:1.25rem; margin-bottom:1.5rem;
+  border-radius:8px; padding:1.25rem; margin-bottom:1.5rem;
   display:flex; align-items:center; gap:1rem;
 }
 .coach-card .coach-av {
   width:50px; height:50px; border-radius:50%; background:var(--surface);
-  border:1px solid var(--border-col); display:flex; align-items:center;
+  border:2px solid rgba(255,107,43,0.25); display:flex; align-items:center;
   justify-content:center; font-weight:700; font-size:1rem; color:var(--orange);
   flex-shrink:0;
 }
-.coach-card-info { flex:1; }
-.coach-card-label { font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-sec); }
-.coach-card-name { font-size:1rem; font-weight:700; margin-top:0.2rem; }
-.coach-card-spec { font-size:0.82rem; color:var(--text-sec); margin-top:0.1rem; }
+.coach-card-info  { flex:1; }
+.coach-card-label { font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-sec); }
+.coach-card-name  { font-size:1rem; font-weight:700; margin-top:0.2rem; }
+.coach-card-spec  { font-size:0.82rem; color:var(--text-sec); margin-top:0.1rem; }
 
-/* Progress ring */
-.progress-ring-wrap { display:flex; flex-direction:column; align-items:center; gap:0.5rem; padding:1.5rem; }
-.progress-ring-val { font-family:var(--font-display); font-size:2.5rem; color:var(--orange); line-height:1; }
-.progress-ring-label { font-size:0.75rem; text-transform:uppercase; letter-spacing:1px; color:var(--text-sec); }
-
-/* Stats row */
+/* ── STATS ROW ── */
 .stats-row { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:1rem; margin-bottom:1.5rem; }
 .stat-card { background:var(--card-bg); border:1px solid var(--border-col); border-radius:6px; padding:1.25rem; }
 .stat-card-label { font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-sec); margin-bottom:0.4rem; }
 .stat-card-val { font-size:1.4rem; font-weight:700; color:var(--text); }
 
-/* Plan view CSS changes */
+/* ── COACH PLAN READ-ONLY ── */
 .plan-section { background:transparent; border:none; margin-bottom:2rem; }
-.plan-section-header { display:flex; align-items:center; justify-content:space-between; padding:0.5rem 0; margin-bottom:1rem; border-bottom:2px solid var(--border-col); }
-.plan-section-header h3 { font-size:1.1rem; font-weight:700; letter-spacing:0.5px; color:var(--orange); text-transform:uppercase; }
-
-/* Exercise Cards Grid */
-.plan-section-body { 
-  padding:0; 
-  display:grid; 
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
-  gap:1.2rem; 
+.plan-section-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0.5rem 0; margin-bottom:1rem; border-bottom:2px solid var(--border-col);
 }
-
-/* Modern Card Layout */
+.plan-section-header h3 {
+  font-size:1.1rem; font-weight:700; letter-spacing:0.5px;
+  color:var(--orange); text-transform:uppercase;
+}
+.plan-section-body {
+  padding:0; display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:1.2rem;
+}
 .exercise-card {
-  background: var(--card-bg);
-  border: 1px solid var(--border-col);
-  border-radius: 8px;
-  padding: 1.25rem;
-  transition: transform 0.2s, border-color 0.2s;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  background:var(--card-bg); border:1px solid var(--border-col);
+  border-radius:8px; padding:1.25rem; transition:transform 0.2s, border-color 0.2s;
+  position:relative; display:flex; flex-direction:column;
+  justify-content:space-between; box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);
 }
-.exercise-card:hover {
-  transform: translateY(-2px);
-  border-color: var(--orange);
-}
-.exercise-title {
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: var(--text);
-  margin-bottom: 0.5rem;
-}
-.exercise-meta {
-  font-size: 0.85rem;
-  color: var(--text-sec);
-  line-height: 1.4;
-}
-
+.exercise-card:hover { transform:translateY(-2px); border-color:var(--orange); }
+.exercise-title { font-size:1.05rem; font-weight:600; color:var(--text); margin-bottom:0.5rem; }
+.exercise-meta  { font-size:0.85rem; color:var(--text-sec); line-height:1.4; }
 .no-plan { text-align:center; color:var(--text-sec); padding:2rem; font-size:0.85rem; }
 
-/* ── MY PLAN: DAY PILLS ROW ── */
+/* ── DAY PILLS ── */
 .day-pills-row {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  margin-bottom: 1.5rem;
+  display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; margin-bottom:1.5rem;
 }
 .day-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.45rem 1rem;
-  border-radius: 6px;
-  border: 1px solid var(--border-col);
-  background: var(--card-bg);
-  color: var(--text-sec);
-  font-size: 0.82rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s;
-  white-space: nowrap;
-  position: relative;
+  display:inline-flex; align-items:center; gap:0.35rem;
+  padding:0.45rem 1rem; border-radius:6px; border:1px solid var(--border-col);
+  background:var(--card-bg); color:var(--text-sec); font-size:0.82rem;
+  font-weight:600; cursor:pointer; transition:all 0.15s; white-space:nowrap; position:relative;
 }
-.day-pill:hover { border-color: #444; color: var(--text); }
-.day-pill.active { background: var(--orange); border-color: var(--orange); color: #fff; }
+.day-pill:hover { border-color:#444; color:var(--text); }
+.day-pill.active { background:var(--orange); border-color:var(--orange); color:#fff; }
 .day-pill .pill-del {
-  display: none;
-  width: 14px; height: 14px;
-  border-radius: 50%;
-  background: rgba(0,0,0,0.3);
-  border: none;
-  color: #fff;
-  font-size: 0.6rem;
-  cursor: pointer;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-  padding: 0;
-  margin-left: 0.1rem;
+  display:none; width:14px; height:14px; border-radius:50%;
+  background:rgba(0,0,0,0.3); border:none; color:#fff; font-size:0.6rem;
+  cursor:pointer; align-items:center; justify-content:center;
+  line-height:1; padding:0; margin-left:0.1rem;
 }
-.day-pill.active .pill-del { display: inline-flex; }
+.day-pill.active .pill-del { display:inline-flex; }
 .day-pill-name-input {
-  background: transparent;
-  border: none;
-  outline: none;
-  color: inherit;
-  font-family: var(--font-body);
-  font-size: 0.82rem;
-  font-weight: 600;
-  width: auto;
-  min-width: 30px;
-  max-width: 120px;
+  background:transparent; border:none; outline:none; color:inherit;
+  font-family:var(--font-body); font-size:0.82rem; font-weight:600;
+  width:auto; min-width:30px; max-width:120px;
 }
 .day-pill-add {
-  width: 32px; height: 32px;
-  border-radius: 6px;
-  border: 1px dashed var(--border-col);
-  background: transparent;
-  color: var(--text-sec);
-  font-size: 1.1rem;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.15s;
-  flex-shrink: 0;
+  width:32px; height:32px; border-radius:6px;
+  border:1px dashed var(--border-col); background:transparent;
+  color:var(--text-sec); font-size:1.1rem; cursor:pointer;
+  display:inline-flex; align-items:center; justify-content:center;
+  transition:all 0.15s; flex-shrink:0;
 }
-.day-pill-add:hover { border-color: var(--orange); color: var(--orange); }
+.day-pill-add:hover { border-color:var(--orange); color:var(--orange); }
 
-/* ── MY PLAN: EXERCISE CARD GRID ── */
+/* ════════════════════════════════════════════════
+   MY PLAN  —  EXERCISE CARDS
+   Cards are display-only. All fields are LOCKED.
+   Only the expand (✦) button opens the detail panel.
+════════════════════════════════════════════════ */
 .my-exercise-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 1rem;
-  margin-bottom: 1.25rem;
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+  gap:1rem; margin-bottom:1.25rem;
 }
-.my-ex-card {
-  background: var(--card-bg);
-  border: 1px solid var(--border-col);
-  border-radius: 8px;
-  padding: 1rem;
-  transition: border-color 0.2s;
-  position: relative;
-}
-.my-ex-card:hover { border-color: #333; }
-.my-ex-card-top {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  margin-bottom: 0.75rem;
-  gap: 0.5rem;
-}
-.my-ex-card-name {
-  font-weight: 600;
-  font-size: 0.95rem;
-  color: var(--text);
-  flex: 1;
-  background: transparent;
-  border: none;
-  outline: none;
-  font-family: var(--font-body);
-  padding: 0;
-  /* Read-only on the card: editing happens only via the expand button */
-  pointer-events: none;
-  user-select: none;
-  caret-color: transparent;
-}
-.my-ex-card-name::placeholder { color: var(--text-sec); }
-.my-ex-expand-btn {
-  width: 26px; height: 26px;
-  border-radius: 50%;
-  border: 1px solid var(--border-col);
-  background: transparent;
-  color: var(--text-sec);
-  font-size: 1rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  transition: all 0.15s;
-}
-.my-ex-expand-btn:hover { border-color: var(--orange); color: var(--orange); }
-.my-ex-card-stats {
-  display: flex;
-  gap: 0.5rem;
-}
-.my-ex-stat {
-  flex: 1;
-  background: var(--input-bg);
-  border: 1px solid var(--input-border);
-  border-radius: 4px;
-  padding: 0.35rem 0.5rem;
-  font-size: 0.78rem;
-  text-align: center;
-  color: var(--text-sec);
-  font-family: var(--font-body);
-  outline: none;
-  transition: border-color 0.15s;
-  /* Read-only on the card: editing happens only via the expand button */
-  pointer-events: none;
-  user-select: none;
-  caret-color: transparent;
-}
-.my-ex-stat:focus { border-color: var(--orange); color: var(--text); }
 
-/* Make the expand button the clear, inviting way to edit a card */
+.my-ex-card {
+  background:var(--card-bg); border:1px solid var(--border-col);
+  border-radius:10px; padding:1.1rem; position:relative;
+  transition:border-color 0.2s, box-shadow 0.2s;
+  cursor:default; overflow:hidden;
+}
+.my-ex-card:hover { border-color:rgba(255,107,43,0.35); box-shadow:0 4px 18px rgba(0,0,0,0.18); }
+
+/* Subtle shimmer line at the top */
+.my-ex-card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:2px;
+  background:linear-gradient(90deg, transparent, var(--orange), transparent);
+  opacity:0; transition:opacity 0.25s;
+}
+.my-ex-card:hover::before { opacity:1; }
+
+/* ── CARD TOP ROW ── */
+.my-ex-card-top {
+  display:flex; align-items:flex-start; justify-content:space-between;
+  margin-bottom:0.85rem; gap:0.5rem;
+}
+
+/* Name is DISPLAY text — not an editable input */
+.my-ex-card-name {
+  font-weight:700; font-size:0.95rem; color:var(--text);
+  flex:1; line-height:1.3; word-break:break-word;
+  user-select:none;
+  /* Remove any input-like look */
+  background:transparent; border:none; outline:none;
+  font-family:var(--font-body); padding:0; pointer-events:none;
+}
+
+/* ── EXPAND BUTTON (only interactive element) ── */
 .my-ex-expand-btn {
-  box-shadow: 0 0 0 0 rgba(255,107,43,0.5);
+  width:28px; height:28px; border-radius:50%;
+  border:1px solid var(--border-col); background:transparent;
+  color:var(--text-sec); font-size:0.9rem;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  flex-shrink:0; transition:all 0.2s; position:relative; z-index:1;
 }
 .my-ex-expand-btn:hover {
-  background: rgba(255,107,43,0.1);
-  box-shadow: 0 0 14px -2px rgba(255,107,43,0.55);
-  transform: scale(1.08);
+  border-color:var(--orange); color:var(--orange);
+  background:rgba(255,107,43,0.08);
+  box-shadow:0 0 0 4px rgba(255,107,43,0.12);
 }
+/* Pulse ring on hover */
+.my-ex-expand-btn::after {
+  content:''; position:absolute; inset:-4px; border-radius:50%;
+  border:1px solid var(--orange); opacity:0; transform:scale(0.7);
+  transition:all 0.25s;
+}
+.my-ex-expand-btn:hover::after { opacity:0.4; transform:scale(1); }
+
+/* ── STAT CHIPS (read-only display) ── */
+.my-ex-card-stats { display:flex; gap:0.5rem; margin-bottom:0.75rem; }
+
+.my-ex-stat-chip {
+  flex:1; display:flex; flex-direction:column; align-items:center;
+  background:rgba(255,107,43,0.06); border:1px solid rgba(255,107,43,0.12);
+  border-radius:6px; padding:0.4rem 0.3rem; gap:0.15rem;
+  user-select:none; pointer-events:none;
+}
+.my-ex-stat-chip-label {
+  font-size:0.62rem; font-weight:700; text-transform:uppercase;
+  letter-spacing:0.4px; color:var(--text-sec);
+}
+.my-ex-stat-chip-val {
+  font-size:1rem; font-weight:700; color:var(--orange);
+  font-family:var(--font-display); line-height:1;
+}
+.my-ex-stat-chip-val.empty { color:var(--text-sec); font-family:var(--font-body); font-size:0.78rem; font-weight:400; }
+
+/* ── WEIGHT ROW ── */
+.my-ex-weight-row {
+  display:flex; align-items:center; gap:0.4rem;
+  font-size:0.78rem; color:var(--text-sec); user-select:none;
+}
+.my-ex-weight-row svg { width:12px; height:12px; flex-shrink:0; }
+.my-ex-weight-val { font-weight:600; color:var(--text-sec); }
+
+/* ── DELETE BUTTON ── */
 .my-ex-del-btn {
-  background: transparent;
-  border: none;
-  color: var(--text-sec);
-  cursor: pointer;
-  font-size: 0.85rem;
-  padding: 0.25rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 0.6rem;
-  opacity: 0.5;
-  transition: opacity 0.15s, color 0.15s;
+  background:transparent; border:none; color:var(--text-sec);
+  cursor:pointer; font-size:0.82rem; padding:0.2rem;
+  display:flex; align-items:center; justify-content:center;
+  margin-top:0.6rem; opacity:0.4; transition:opacity 0.15s, color 0.15s;
+  width:100%;
 }
-.my-ex-del-btn:hover { opacity: 1; color: #ff6b7a; }
+.my-ex-del-btn:hover { opacity:1; color:#ff6b7a; }
 
-/* ── EXERCISE DETAIL PANEL ── */
+/* Add card */
+.add-exercise-card {
+  border:1px dashed var(--border-col); border-radius:10px;
+  display:flex; align-items:center; justify-content:center;
+  min-height:130px; cursor:pointer; color:var(--text-sec);
+  font-size:0.85rem; gap:0.4rem; transition:all 0.2s;
+  background:transparent; font-family:var(--font-body);
+}
+.add-exercise-card:hover { border-color:var(--orange); color:var(--orange); background:rgba(255,107,43,0.03); }
+
+/* ════════════════════════════════════════════════
+   EXERCISE DETAIL PANEL  —  redesigned
+════════════════════════════════════════════════ */
 .ex-detail-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.7);
-  backdrop-filter: blur(6px);
-  z-index: 400;
-  display: none;
-  align-items: flex-end;
-  justify-content: center;
+  position:fixed; inset:0; background:rgba(0,0,0,0.75);
+  backdrop-filter:blur(8px); z-index:400;
+  display:none; align-items:flex-end; justify-content:center;
 }
-.ex-detail-overlay.open { display: flex; }
-@media (min-width: 600px) {
-  .ex-detail-overlay { align-items: center; }
-}
+.ex-detail-overlay.open { display:flex; }
+@media(min-width:600px) { .ex-detail-overlay { align-items:center; } }
+
 .ex-detail-panel {
-  background: var(--surface);
-  border: 1px solid var(--border-col);
-  border-radius: 12px 12px 0 0;
-  width: 100%;
-  max-width: 480px;
-  padding: 1.5rem;
-  max-height: 90vh;
-  overflow-y: auto;
+  background:var(--surface); border:1px solid var(--border-col);
+  border-radius:16px 16px 0 0; width:100%; max-width:460px;
+  padding:0; max-height:92vh; overflow:hidden;
+  display:flex; flex-direction:column;
+  box-shadow:0 -24px 60px rgba(0,0,0,0.5);
+  animation:slideUp 0.28s cubic-bezier(0.34,1.3,0.64,1);
 }
-@media (min-width: 600px) {
-  .ex-detail-panel { border-radius: 12px; }
+@media(min-width:600px) {
+  .ex-detail-panel { border-radius:16px; animation:popIn 0.25s cubic-bezier(0.34,1.2,0.64,1); }
 }
-.ex-detail-title {
-  font-size: 1.1rem;
-  font-weight: 700;
-  margin-bottom: 1.25rem;
-  color: var(--text);
+@keyframes slideUp  { from { transform:translateY(100%); opacity:0; } to { transform:translateY(0); opacity:1; } }
+@keyframes popIn    { from { transform:scale(0.92); opacity:0; } to { transform:scale(1); opacity:1; } }
+
+/* ── PANEL HEADER ── */
+.ex-detail-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:1.1rem 1.4rem 0; flex-shrink:0;
 }
+.ex-detail-handle {
+  width:36px; height:4px; background:var(--border-col);
+  border-radius:2px; margin:0 auto 1rem;
+  flex-shrink:0; display:block;
+}
+.ex-detail-name-input {
+  font-size:1.15rem; font-weight:700; color:var(--text);
+  background:transparent; border:none; outline:none;
+  font-family:var(--font-body); flex:1; padding:0;
+  caret-color:var(--orange);
+}
+.ex-detail-name-input::placeholder { color:var(--text-sec); font-weight:400; }
+.ex-detail-close {
+  width:30px; height:30px; border-radius:50%;
+  border:1px solid var(--border-col); background:transparent;
+  color:var(--text-sec); font-size:1rem; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0; transition:all 0.15s;
+}
+.ex-detail-close:hover { border-color:var(--text); color:var(--text); }
+
+/* ── SCROLL BODY ── */
+.ex-detail-body { padding:1rem 1.4rem 0; overflow-y:auto; flex:1; }
+
+/* ── STATS ROW — the three glowing boxes ── */
 .ex-detail-stats-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.85rem;
-  margin-bottom: 1.25rem;
+  display:grid; grid-template-columns:1fr 1fr 1fr;
+  gap:0.75rem; margin-bottom:1.25rem;
 }
 
-/* Each stat field becomes a glowing "light box" tile */
-.ex-detail-field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  position: relative;
-  padding: 0.85rem 0.9rem;
-  border-radius: 10px;
-  background:
-    linear-gradient(180deg, rgba(255,107,43,0.06), rgba(255,107,43,0.01)),
-    var(--card-bg);
-  border: 1px solid var(--border-col);
-  overflow: hidden;
-  transition: border-color 0.2s, box-shadow 0.25s, transform 0.2s;
+.ex-stat-box {
+  background:var(--card-bg); border:1px solid var(--border-col);
+  border-radius:10px; padding:0.9rem 0.75rem;
+  display:flex; flex-direction:column; gap:0.3rem;
+  position:relative; overflow:hidden;
+  transition:border-color 0.2s, box-shadow 0.2s;
+  cursor:text;
+}
+/* Glow on focus-within */
+.ex-stat-box:focus-within {
+  border-color:var(--orange);
+  box-shadow:0 0 0 3px rgba(255,107,43,0.15), 0 4px 16px rgba(255,107,43,0.08);
+}
+/* Animated bottom bar */
+.ex-stat-box::after {
+  content:''; position:absolute; bottom:0; left:0; right:0; height:2px;
+  background:var(--orange);
+  transform:scaleX(0); transform-origin:left;
+  transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+.ex-stat-box:focus-within::after { transform:scaleX(1); }
+
+/* Light shimmer sweep on hover */
+.ex-stat-box::before {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(110deg, transparent 30%, rgba(255,107,43,0.04) 50%, transparent 70%);
+  background-size:200% 100%; background-position:200% 0;
+  transition:background-position 0.5s ease;
+}
+.ex-stat-box:hover::before { background-position:-200% 0; }
+
+.ex-stat-box-label {
+  font-size:0.65rem; font-weight:700; text-transform:uppercase;
+  letter-spacing:0.6px; color:var(--text-sec);
+  display:flex; align-items:center; gap:0.3rem;
+}
+.ex-stat-box-label svg { width:10px; height:10px; }
+
+.ex-stat-box-input {
+  background:transparent; border:none; outline:none;
+  color:var(--text); font-family:var(--font-display);
+  font-size:1.5rem; line-height:1; padding:0;
+  width:100%; caret-color:var(--orange);
+}
+.ex-stat-box-input::placeholder { color:rgba(255,255,255,0.15); font-size:1.4rem; }
+.ex-stat-box-unit {
+  font-size:0.7rem; color:var(--text-sec); font-weight:500;
+  margin-top:-0.1rem;
 }
 
-/* Animated light sweep that travels across the tile */
-.ex-detail-field::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    120deg,
-    transparent 0%,
-    rgba(255,107,43,0) 40%,
-    rgba(255,107,43,0.22) 50%,
-    rgba(255,107,43,0) 60%,
-    transparent 100%
-  );
-  transform: translateX(-120%);
-  pointer-events: none;
-  transition: opacity 0.3s;
-  opacity: 0;
-}
-
-/* Glowing top edge accent */
-.ex-detail-field::after {
-  content: "";
-  position: absolute;
-  top: 0; left: 10%; right: 10%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--orange), transparent);
-  opacity: 0;
-  transition: opacity 0.25s;
-}
-
-.ex-detail-field:hover {
-  transform: translateY(-1px);
-  border-color: rgba(255,107,43,0.4);
-  box-shadow: 0 6px 18px -8px rgba(255,107,43,0.35);
-}
-
-/* When the inner input is focused, light up the whole tile and run the sweep */
-.ex-detail-field:focus-within {
-  border-color: var(--orange);
-  box-shadow:
-    0 0 0 1px rgba(255,107,43,0.5),
-    0 0 22px -2px rgba(255,107,43,0.45),
-    inset 0 0 16px -8px rgba(255,107,43,0.6);
-  animation: ex-field-pulse 1.8s ease-in-out infinite;
-}
-.ex-detail-field:focus-within::before {
-  opacity: 1;
-  animation: ex-light-sweep 1.6s ease-in-out infinite;
-}
-.ex-detail-field:focus-within::after { opacity: 1; }
-
-@keyframes ex-light-sweep {
-  0%   { transform: translateX(-120%); }
-  60%  { transform: translateX(120%); }
-  100% { transform: translateX(120%); }
-}
-@keyframes ex-field-pulse {
-  0%, 100% { box-shadow: 0 0 0 1px rgba(255,107,43,0.5), 0 0 18px -4px rgba(255,107,43,0.4), inset 0 0 14px -8px rgba(255,107,43,0.5); }
-  50%      { box-shadow: 0 0 0 1px rgba(255,107,43,0.7), 0 0 28px 0   rgba(255,107,43,0.6), inset 0 0 18px -6px rgba(255,107,43,0.7); }
-}
-
-.ex-detail-label {
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--text-sec);
-  position: relative;
-  z-index: 1;
-  transition: color 0.2s;
-}
-.ex-detail-field:focus-within .ex-detail-label { color: var(--orange); }
-
-.ex-detail-input {
-  background: var(--input-bg);
-  border: 1px solid var(--input-border);
-  border-radius: 6px;
-  padding: 0.6rem 0.75rem;
-  color: var(--text);
-  font-family: var(--font-body);
-  font-size: 0.95rem;
-  font-weight: 600;
-  outline: none;
-  position: relative;
-  z-index: 1;
-  transition: border-color 0.15s, background 0.2s;
-}
-.ex-detail-input:focus {
-  border-color: var(--orange);
-  background: rgba(255,107,43,0.06);
-}
-
-/* The standalone "Last weight" field shouldn't be a tile, keep it simple */
-.ex-detail-panel > .ex-detail-field {
-  background: transparent;
-  border: none;
-  padding: 0;
-  overflow: visible;
-}
-.ex-detail-panel > .ex-detail-field::before,
-.ex-detail-panel > .ex-detail-field::after { display: none; }
-.ex-detail-panel > .ex-detail-field:hover { transform: none; box-shadow: none; }
-.ex-detail-panel > .ex-detail-field:focus-within { box-shadow: none; animation: none; }
+/* ── MEDIA BOX ── */
 .ex-detail-media-box {
-  border: 1px dashed var(--border-col);
-  border-radius: 6px;
-  overflow: hidden;
-  margin-bottom: 1.25rem;
-  background: var(--card-bg);
+  border:1px solid var(--border-col); border-radius:10px;
+  overflow:hidden; margin-bottom:1.25rem; background:var(--card-bg);
 }
-.ex-detail-media-tabs {
-  display: flex;
-  border-bottom: 1px solid var(--border-col);
-}
+.ex-detail-media-tabs { display:flex; border-bottom:1px solid var(--border-col); }
 .ex-detail-media-tab {
-  flex: 1;
-  padding: 0.5rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-align: center;
-  color: var(--text-sec);
-  cursor: pointer;
-  transition: all 0.15s;
-  border-bottom: 2px solid transparent;
+  flex:1; padding:0.55rem; font-size:0.75rem; font-weight:600;
+  text-align:center; color:var(--text-sec); cursor:pointer;
+  transition:all 0.15s; border-bottom:2px solid transparent;
 }
-.ex-detail-media-tab.active { color: var(--orange); border-bottom-color: var(--orange); }
-.ex-detail-media-body { padding: 1rem; }
+.ex-detail-media-tab.active { color:var(--orange); border-bottom-color:var(--orange); }
+.ex-detail-media-body { padding:1rem; }
 .ex-detail-media-preview {
-  width: 100%;
-  aspect-ratio: 16/9;
-  object-fit: cover;
-  border-radius: 4px;
-  display: block;
-  background: var(--input-bg);
+  width:100%; aspect-ratio:16/9; object-fit:cover;
+  border-radius:6px; display:block; background:var(--input-bg);
 }
 .ex-detail-media-placeholder {
-  aspect-ratio: 16/9;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-sec);
-  font-size: 0.82rem;
-  gap: 0.5rem;
-  cursor: pointer;
+  aspect-ratio:16/9; display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  color:var(--text-sec); font-size:0.82rem; gap:0.5rem; cursor:pointer;
+  border:1px dashed var(--border-col); border-radius:6px;
+  transition:all 0.2s;
 }
-.ex-detail-media-placeholder svg { width: 32px; height: 32px; opacity: 0.4; }
+.ex-detail-media-placeholder:hover { border-color:var(--orange); color:var(--orange); }
+.ex-detail-media-placeholder svg { width:32px; height:32px; opacity:0.4; }
 .ex-detail-url-input {
-  width: 100%;
-  background: var(--input-bg);
-  border: 1px solid var(--input-border);
-  border-radius: 4px;
-  padding: 0.6rem 0.75rem;
-  color: var(--text);
-  font-family: var(--font-body);
-  font-size: 0.85rem;
-  outline: none;
-  margin-bottom: 0.6rem;
+  width:100%; background:var(--input-bg); border:1px solid var(--input-border);
+  border-radius:4px; padding:0.6rem 0.75rem; color:var(--text);
+  font-family:var(--font-body); font-size:0.85rem; outline:none; margin-bottom:0.6rem;
 }
-.ex-detail-url-input:focus { border-color: var(--orange); }
+.ex-detail-url-input:focus { border-color:var(--orange); }
+
+/* ── PANEL FOOTER ── */
 .ex-detail-actions {
-  display: flex;
-  gap: 0.75rem;
-  justify-content: flex-end;
+  display:flex; gap:0.75rem; justify-content:flex-end;
+  padding:1rem 1.4rem 1.4rem; flex-shrink:0;
+  border-top:1px solid var(--border-col); background:var(--surface);
 }
 .btn-icon-sm {
-  background: transparent;
-  border: 1px solid var(--border-col);
-  color: var(--text-sec);
-  border-radius: 4px;
-  padding: 0.45rem 0.7rem;
-  font-size: 0.8rem;
-  cursor: pointer;
-  font-family: var(--font-body);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  transition: all 0.15s;
+  background:transparent; border:1px solid var(--border-col); color:var(--text-sec);
+  border-radius:6px; padding:0.5rem 0.85rem; font-size:0.82rem;
+  cursor:pointer; font-family:var(--font-body);
+  display:inline-flex; align-items:center; gap:0.35rem; transition:all 0.15s;
 }
-.btn-icon-sm:hover { border-color: var(--text-sec); color: var(--text); }
-.add-exercise-card {
-  border: 1px dashed var(--border-col);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100px;
-  cursor: pointer;
-  color: var(--text-sec);
-  font-size: 0.85rem;
-  gap: 0.4rem;
-  transition: all 0.15s;
-  background: transparent;
-  font-family: var(--font-body);
-}
-.add-exercise-card:hover { border-color: var(--orange); color: var(--orange); }
+.btn-icon-sm:hover { border-color:var(--text-sec); color:var(--text); }
 
-/* Sidebar role badge */
-.role-badge { display:inline-block; background:rgba(255,107,43,0.12); color:var(--orange); font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; padding:0.15rem 0.5rem; border-radius:3px; }
-.form-group select { background:var(--input-bg); border:1px solid var(--input-border); color:var(--text); padding:0.75rem 1rem; border-radius:4px; font-family:var(--font-body); font-size:0.9rem; outline:none; }
+/* ════════════════════════════════════════════════
+   MISC
+════════════════════════════════════════════════ */
+.form-group select {
+  background:var(--input-bg); border:1px solid var(--input-border);
+  color:var(--text); padding:0.75rem 1rem; border-radius:4px;
+  font-family:var(--font-body); font-size:0.9rem; outline:none;
+}

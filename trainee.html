@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>T-0 — My Training</title>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
   <link rel="stylesheet" href="Trainee-style.css"/>
-  <script>
-    (function(){ const t=localStorage.getItem('t0-theme'); if(t) document.documentElement.setAttribute('data-theme',t); })();
-  </script>
+  <script>(function(){ const t=localStorage.getItem('t0-theme'); if(t) document.documentElement.setAttribute('data-theme',t); })();</script>
 </head>
 <body>
+
 <nav>
   <div class="nav-left-group">
     <div class="logo" id="nav-logo">T-0</div>
@@ -80,39 +80,27 @@
         </div>
       </div>
 
+      <!-- ── OVERVIEW ── -->
       <div id="section-overview">
         <div id="coach-card-wrap"></div>
-
         <div class="stats-row" id="stats-row">
-          <div class="stat-card">
-            <div class="stat-card-label">Progress</div>
-            <div class="stat-card-val" id="stat-progress">—</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-card-label">Weight</div>
-            <div class="stat-card-val" id="stat-weight">—</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-card-label">Goal</div>
-            <div class="stat-card-val" style="font-size:1rem" id="stat-goal">—</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-card-label">Sessions/week</div>
-            <div class="stat-card-val" id="stat-sessions">—</div>
-          </div>
+          <div class="stat-card"><div class="stat-card-label">Progress</div><div class="stat-card-val" id="stat-progress">—</div></div>
+          <div class="stat-card"><div class="stat-card-label">Weight</div><div class="stat-card-val" id="stat-weight">—</div></div>
+          <div class="stat-card"><div class="stat-card-label">Goal</div><div class="stat-card-val" style="font-size:1rem" id="stat-goal">—</div></div>
+          <div class="stat-card"><div class="stat-card-label">Sessions/week</div><div class="stat-card-val" id="stat-sessions">—</div></div>
         </div>
-
-        <div id="overview-no-coach" style="display:none; text-align:center; padding:3rem 2rem; color:var(--text-sec);">
-          <div style="font-size:2.5rem; margin-bottom:1rem;">🏋️</div>
-          <h3 style="color:var(--text); margin-bottom:0.5rem;">Not linked to a coach yet</h3>
+        <div id="overview-no-coach" style="display:none;text-align:center;padding:3rem 2rem;color:var(--text-sec);">
+          <div style="font-size:2.5rem;margin-bottom:1rem;">🏋️</div>
+          <h3 style="color:var(--text);margin-bottom:0.5rem;">Not linked to a coach yet</h3>
           <p style="font-size:0.85rem;">Ask your coach to add you using your User ID below</p>
           <div style="margin-top:1.5rem;">
             <div style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-sec);margin-bottom:0.5rem;">Your User ID</div>
-            <div class="user-id-chip" id="overview-user-id" style="margin:0 auto; display:inline-flex;">📋 Loading...</div>
+            <div class="user-id-chip" id="overview-user-id" style="margin:0 auto;display:inline-flex;">📋 Loading...</div>
           </div>
         </div>
       </div>
 
+      <!-- ── PROFILE ── -->
       <div id="section-profile" class="hidden">
         <div style="margin-bottom:1.5rem;">
           <div style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-sec);margin-bottom:0.5rem;">Your User ID (share with your coach)</div>
@@ -136,10 +124,9 @@
         </div>
       </div>
 
+      <!-- ── WORKOUT PLAN ── -->
       <div id="section-workout" class="hidden">
-        <div style="margin-bottom:1.5rem;">
-          <h2 style="font-size:1.25rem;font-weight:700;">Workout Plan</h2>
-        </div>
+        <div style="margin-bottom:1.5rem;"><h2 style="font-size:1.25rem;font-weight:700;">Workout Plan</h2></div>
         <div class="dash-tabs" id="workout-tabs">
           <div class="dash-tab active" data-plan-tab="coach" data-plan-type="workout">Coach Plan</div>
           <div class="dash-tab" data-plan-tab="mine" data-plan-type="workout">My Plan</div>
@@ -160,10 +147,9 @@
         </div>
       </div>
 
+      <!-- ── DIET PLAN ── -->
       <div id="section-diet" class="hidden">
-        <div style="margin-bottom:1.5rem;">
-          <h2 style="font-size:1.25rem;font-weight:700;">Diet Plan</h2>
-        </div>
+        <div style="margin-bottom:1.5rem;"><h2 style="font-size:1.25rem;font-weight:700;">Diet Plan</h2></div>
         <div class="dash-tabs" id="diet-tabs">
           <div class="dash-tab active" data-plan-tab="coach" data-plan-type="diet">Coach Plan</div>
           <div class="dash-tab" data-plan-tab="mine" data-plan-type="diet">My Plan</div>
@@ -183,55 +169,92 @@
           <div class="my-exercise-grid" id="diet-exercise-grid"></div>
         </div>
       </div>
+
     </div>
   </div>
 </div>
 
+<!-- ════════════════════════════════════════
+     EXERCISE DETAIL PANEL
+════════════════════════════════════════ -->
 <div class="ex-detail-overlay" id="ex-detail-overlay">
   <div class="ex-detail-panel">
-    <div class="ex-detail-title" id="ex-detail-name-display">Exercise</div>
-    <div class="ex-detail-stats-row">
-      <div class="ex-detail-field">
-        <div class="ex-detail-label">Sets</div>
-        <input type="number" class="ex-detail-input" id="ex-detail-sets" placeholder="3" min="1"/>
-      </div>
-      <div class="ex-detail-field">
-        <div class="ex-detail-label">Reps</div>
-        <input type="number" class="ex-detail-input" id="ex-detail-reps" placeholder="10" min="1"/>
-      </div>
-    </div>
-    <div class="ex-detail-field" style="margin-bottom:1.25rem;">
-      <div class="ex-detail-label">Last weight</div>
-      <input type="text" class="ex-detail-input" id="ex-detail-weight" placeholder="e.g. 20 kg"/>
+
+    <!-- drag handle -->
+    <span class="ex-detail-handle"></span>
+
+    <!-- header: name input + close -->
+    <div class="ex-detail-header">
+      <input type="text" class="ex-detail-name-input" id="ex-detail-name-input" placeholder="Exercise name"/>
+      <button class="ex-detail-close" onclick="closeExDetail()">✕</button>
     </div>
 
-    <div class="ex-detail-media-box">
-      <div class="ex-detail-media-tabs">
-        <div class="ex-detail-media-tab active" id="media-tab-upload">📁 Upload</div>
-        <div class="ex-detail-media-tab" id="media-tab-link">🔗 Link</div>
-      </div>
-      <div class="ex-detail-media-body">
-        <div id="media-body-upload">
-          <div class="ex-detail-media-placeholder" id="media-upload-placeholder" onclick="document.getElementById('media-file-input').click()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9l4-4 4 4 4-4 4 4"/><circle cx="8.5" cy="13.5" r="1.5"/></svg>
-            <span>Tap to add Video / Image</span>
-            <span style="font-size:0.72rem;opacity:0.6">from your device</span>
-          </div>
-          <input type="file" id="media-file-input" accept="image/*,video/*" style="display:none"/>
-          <div id="media-upload-preview" style="display:none;position:relative;">
-            <img id="media-img-preview" class="ex-detail-media-preview" style="display:none"/>
-            <video id="media-vid-preview" class="ex-detail-media-preview" controls style="display:none"></video>
-            <button onclick="clearMediaUpload()" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.6);border:none;color:#fff;border-radius:50%;width:24px;height:24px;cursor:pointer;font-size:0.8rem;display:flex;align-items:center;justify-content:center;">✕</button>
-          </div>
-        </div>
-        <div id="media-body-link" style="display:none">
-          <input type="url" class="ex-detail-url-input" id="ex-detail-media-url" placeholder="Paste YouTube, image, or video URL..."/>
-          <div id="media-link-preview" style="display:none;margin-top:0.5rem;"></div>
-          <button class="btn-icon-sm" style="width:100%;justify-content:center;" onclick="previewMediaLink()">Preview link</button>
-        </div>
-      </div>
-    </div>
+    <!-- scrollable body -->
+    <div class="ex-detail-body">
 
+      <!-- Three glowing stat boxes -->
+      <div class="ex-detail-stats-row">
+
+        <div class="ex-stat-box">
+          <div class="ex-stat-box-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 6h16M4 12h16M4 18h7"/></svg>
+            Sets
+          </div>
+          <input type="number" class="ex-stat-box-input" id="ex-detail-sets" placeholder="—" min="1"/>
+          <div class="ex-stat-box-unit">× count</div>
+        </div>
+
+        <div class="ex-stat-box">
+          <div class="ex-stat-box-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+            Reps
+          </div>
+          <input type="number" class="ex-stat-box-input" id="ex-detail-reps" placeholder="—" min="1"/>
+          <div class="ex-stat-box-unit">per set</div>
+        </div>
+
+        <div class="ex-stat-box">
+          <div class="ex-stat-box-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 3v5l-2 2 2 2v5"/><path d="M18 3v5l2 2-2 2v5"/><line x1="6" y1="8" x2="18" y2="8"/><line x1="6" y1="16" x2="18" y2="16"/></svg>
+            Weight
+          </div>
+          <input type="text" class="ex-stat-box-input" id="ex-detail-weight" placeholder="—" style="font-size:1.25rem;"/>
+          <div class="ex-stat-box-unit">kg / lbs</div>
+        </div>
+
+      </div>
+
+      <!-- Media box -->
+      <div class="ex-detail-media-box">
+        <div class="ex-detail-media-tabs">
+          <div class="ex-detail-media-tab active" id="media-tab-upload">📁 Upload</div>
+          <div class="ex-detail-media-tab" id="media-tab-link">🔗 Link</div>
+        </div>
+        <div class="ex-detail-media-body">
+          <div id="media-body-upload">
+            <div class="ex-detail-media-placeholder" id="media-upload-placeholder" onclick="document.getElementById('media-file-input').click()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9l4-4 4 4 4-4 4 4"/><circle cx="8.5" cy="13.5" r="1.5"/></svg>
+              <span>Tap to add Video / Image</span>
+              <span style="font-size:0.72rem;opacity:0.6">from your device</span>
+            </div>
+            <input type="file" id="media-file-input" accept="image/*,video/*" style="display:none"/>
+            <div id="media-upload-preview" style="display:none;position:relative;">
+              <img id="media-img-preview" class="ex-detail-media-preview" style="display:none"/>
+              <video id="media-vid-preview" class="ex-detail-media-preview" controls style="display:none"></video>
+              <button onclick="clearMediaUpload()" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.6);border:none;color:#fff;border-radius:50%;width:24px;height:24px;cursor:pointer;font-size:0.8rem;display:flex;align-items:center;justify-content:center;">✕</button>
+            </div>
+          </div>
+          <div id="media-body-link" style="display:none">
+            <input type="url" class="ex-detail-url-input" id="ex-detail-media-url" placeholder="Paste YouTube, image, or video URL..."/>
+            <div id="media-link-preview" style="display:none;margin-top:0.5rem;"></div>
+            <button class="btn-icon-sm" style="width:100%;justify-content:center;" onclick="previewMediaLink()">Preview link</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end .ex-detail-body -->
+
+    <!-- footer actions -->
     <div class="ex-detail-actions">
       <button class="btn-icon-sm" onclick="closeExDetail()">Cancel</button>
       <button class="btn btn-orange btn-sm" onclick="saveExDetail()">
@@ -239,6 +262,7 @@
         Done
       </button>
     </div>
+
   </div>
 </div>
 
@@ -247,7 +271,581 @@
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// ... (The JavaScript remains unchanged as per your file) ...
+/* ════════════════════════════════════════════════
+   SUPABASE  +  PERSISTENT SESSION
+════════════════════════════════════════════════ */
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON, {
+  auth: { persistSession:true, autoRefreshToken:true, detectSessionInUrl:true }
+});
+
+let currentUser    = null;
+let currentProfile = null;
+let relationship   = null;
+
+/* State: my plan data, keyed by plan type */
+const myPlanState = {
+  workout: { days:[], activeDayIdx:0 },
+  diet:    { days:[], activeDayIdx:0 }
+};
+
+/* ── AUTH ── */
+sb.auth.onAuthStateChange(async (event, session) => {
+  if (event === 'SIGNED_OUT' || !session) { window.location.href = 'auth.html'; return; }
+  if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && !currentUser) {
+    currentUser = session.user;
+    await boot();
+  }
+});
+
+async function boot() {
+  const { data: p } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
+  if (!p || p.role !== 'trainee') { window.location.href = 'coach.html'; return; }
+  currentProfile = p;
+  populateUI();
+  await loadRelationship();
+}
+
+/* ── PROFILE UI ── */
+function populateUI() {
+  const name     = currentProfile.full_name || currentUser.email;
+  const initials = name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+  document.getElementById('sb-trainee-name').textContent      = name;
+  document.getElementById('header-trainee-name').textContent  = name.split(' ')[0] + '!';
+  document.getElementById('profile-avatar').textContent       = initials;
+  document.getElementById('profile-display-name').textContent = name;
+  document.getElementById('profile-email-display').textContent= currentUser.email;
+  document.getElementById('pf-name').value  = currentProfile.full_name || '';
+  document.getElementById('pf-email').value = currentUser.email;
+
+  const uid = currentUser.id;
+  ['profile-user-id','overview-user-id'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = '📋 ' + uid;
+    el.onclick = () => navigator.clipboard.writeText(uid).then(() => showToast('User ID copied!'));
+  });
+}
+
+document.getElementById('save-profile-btn').addEventListener('click', async () => {
+  const name = document.getElementById('pf-name').value.trim();
+  const { error } = await sb.from('profiles').update({ full_name:name }).eq('id', currentUser.id);
+  if (error) { showToast('Error: ' + error.message); return; }
+  currentProfile.full_name = name;
+  populateUI();
+  showToast('Profile saved ✓');
+});
+
+/* ── RELATIONSHIP ── */
+async function loadRelationship() {
+  const { data } = await sb
+    .from('coach_clients')
+    .select('*, coach:profiles!coach_clients_coach_id_fkey(id,full_name,email,specialty)')
+    .eq('trainee_id', currentUser.id)
+    .order('created_at', { ascending:false })
+    .limit(1)
+    .maybeSingle();
+
+  relationship = data;
+
+  if (!data) {
+    document.getElementById('overview-no-coach').style.display = 'block';
+    document.getElementById('stats-row').style.display         = 'none';
+    document.getElementById('coach-card-wrap').innerHTML       = '';
+    return;
+  }
+  document.getElementById('overview-no-coach').style.display = 'none';
+  document.getElementById('stats-row').style.display         = '';
+
+  const coach     = data.coach;
+  const coachName = coach?.full_name || 'Your Coach';
+  const coachInit = coachName.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+  document.getElementById('coach-card-wrap').innerHTML = `
+    <div class="coach-card">
+      <div class="coach-av">${coachInit}</div>
+      <div class="coach-card-info">
+        <div class="coach-card-label">Your Coach</div>
+        <div class="coach-card-name">${coachName}</div>
+        <div class="coach-card-spec">${coach?.specialty||''}</div>
+      </div>
+    </div>`;
+
+  document.getElementById('stat-progress').textContent = (data.progress||0) + '%';
+  document.getElementById('stat-weight').textContent   = data.weight||'—';
+  document.getElementById('stat-goal').textContent     = data.goal||'—';
+  document.getElementById('stat-sessions').textContent = data.weekly_sessions ? data.weekly_sessions + 'x' : '—';
+}
+
+/* ════════════════════════════════════════════════
+   PLAN TABS  (Coach / My Plan switcher)
+════════════════════════════════════════════════ */
+let workoutLoaded = { coach:false, mine:false };
+let dietLoaded    = { coach:false, mine:false };
+
+document.querySelectorAll('#workout-tabs .dash-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('#workout-tabs .dash-tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    const src = tab.getAttribute('data-plan-tab');
+    document.getElementById('workout-coach-view').classList.toggle('hidden', src !== 'coach');
+    document.getElementById('workout-mine-view').classList.toggle('hidden', src !== 'mine');
+    if (src === 'coach' && !workoutLoaded.coach) loadCoachPlan('workout');
+    if (src === 'mine'  && !workoutLoaded.mine)  loadMyPlan('workout');
+  });
+});
+
+document.querySelectorAll('#diet-tabs .dash-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('#diet-tabs .dash-tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    const src = tab.getAttribute('data-plan-tab');
+    document.getElementById('diet-coach-view').classList.toggle('hidden', src !== 'coach');
+    document.getElementById('diet-mine-view').classList.toggle('hidden', src !== 'mine');
+    if (src === 'coach' && !dietLoaded.coach) loadCoachPlan('diet');
+    if (src === 'mine'  && !dietLoaded.mine)  loadMyPlan('diet');
+  });
+});
+
+/* ════════════════════════════════════════════════
+   COACH PLAN  —  read-only exercise cards
+════════════════════════════════════════════════ */
+async function loadCoachPlan(type) {
+  const container = document.getElementById(type + '-plan-container');
+  if (!relationship) {
+    container.innerHTML = `<div class="no-plan">No coach linked yet.</div>`;
+    workoutLoaded.coach = true; dietLoaded.coach = true; return;
+  }
+  const table = type === 'workout' ? 'workout_plans' : 'diet_plans';
+  const { data } = await sb.from(table)
+    .select('*')
+    .eq('trainee_id', currentUser.id)
+    .eq('coach_id', relationship.coach_id)
+    .eq('created_by', 'coach')
+    .order('sort_order');
+
+  if (!data || data.length === 0) {
+    container.innerHTML = `<div class="no-plan">Your coach hasn't set a ${type} plan yet.</div>`;
+  } else {
+    container.innerHTML = data.map(day => {
+      const exercises = Array.isArray(day.items) ? day.items : (day.items ? Object.values(day.items) : []);
+      return `
+        <div class="plan-section">
+          <div class="plan-section-header"><h3>${day.day_label}</h3></div>
+          <div class="plan-section-body">
+            ${exercises.map(ex => {
+              if (typeof ex === 'string') return `<div class="exercise-card"><div class="exercise-title">${ex}</div></div>`;
+              return `<div class="exercise-card">
+                <div class="exercise-title">${ex.name||ex}</div>
+                <div class="exercise-meta">
+                  ${ex.sets ? `<span>${ex.sets} sets</span>` : ''}
+                  ${ex.reps ? `<span> × ${ex.reps} reps</span>` : ''}
+                </div>
+              </div>`;
+            }).join('')}
+          </div>
+        </div>`;
+    }).join('');
+  }
+  if (type === 'workout') workoutLoaded.coach = true;
+  else                    dietLoaded.coach    = true;
+}
+
+/* ════════════════════════════════════════════════
+   MY PLAN  —  day pills + exercise card grid
+   Cards are DISPLAY ONLY — editing is via panel
+════════════════════════════════════════════════ */
+async function loadMyPlan(type) {
+  const table = type === 'workout' ? 'workout_plans' : 'diet_plans';
+  const { data } = await sb.from(table)
+    .select('*')
+    .eq('trainee_id', currentUser.id)
+    .eq('created_by', 'trainee')
+    .order('sort_order');
+
+  const state = myPlanState[type];
+  state.days = (data || []).map(row => ({
+    id:        row.id,
+    day_label: row.day_label,
+    sort_order:row.sort_order,
+    exercises: Array.isArray(row.items) ? row.items : []
+  }));
+  state.activeDayIdx = 0;
+  renderDayPills(type);
+  renderExerciseGrid(type);
+
+  if (type === 'workout') workoutLoaded.mine = true;
+  else                    dietLoaded.mine    = true;
+}
+
+/* ── DAY PILLS ── */
+function renderDayPills(type) {
+  const container = document.getElementById(type + '-day-pills');
+  const state     = myPlanState[type];
+  container.innerHTML = '';
+
+  state.days.forEach((day, i) => {
+    const pill = document.createElement('div');
+    pill.className = 'day-pill' + (i === state.activeDayIdx ? ' active' : '');
+
+    const nameInput = document.createElement('input');
+    nameInput.className   = 'day-pill-name-input';
+    nameInput.value       = day.day_label;
+    nameInput.placeholder = 'Day';
+    nameInput.addEventListener('change', e => { state.days[i].day_label = e.target.value; });
+    nameInput.addEventListener('click', e => { e.stopPropagation(); });
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'pill-del';
+    delBtn.textContent = '✕';
+    delBtn.title = 'Remove day';
+    delBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      state.days.splice(i, 1);
+      if (state.activeDayIdx >= state.days.length) state.activeDayIdx = Math.max(0, state.days.length - 1);
+      renderDayPills(type);
+      renderExerciseGrid(type);
+    });
+
+    pill.appendChild(nameInput);
+    pill.appendChild(delBtn);
+    pill.addEventListener('click', () => {
+      state.activeDayIdx = i;
+      renderDayPills(type);
+      renderExerciseGrid(type);
+    });
+    container.appendChild(pill);
+  });
+
+  // "+ add day" button
+  const addBtn = document.createElement('button');
+  addBtn.className   = 'day-pill-add';
+  addBtn.textContent = '+';
+  addBtn.title       = 'Add day';
+  addBtn.addEventListener('click', () => {
+    state.days.push({ id:null, day_label:'Day '+(state.days.length+1), sort_order:state.days.length, exercises:[] });
+    state.activeDayIdx = state.days.length - 1;
+    renderDayPills(type);
+    renderExerciseGrid(type);
+  });
+  container.appendChild(addBtn);
+}
+
+/* ── EXERCISE CARD GRID (display only — edit via panel) ── */
+function renderExerciseGrid(type) {
+  const grid  = document.getElementById(type + '-exercise-grid');
+  const state = myPlanState[type];
+  grid.innerHTML = '';
+
+  if (state.days.length === 0) {
+    grid.innerHTML = `<div style="color:var(--text-sec);font-size:0.85rem;grid-column:1/-1;padding:1rem 0;">Add a day first using the + button above.</div>`;
+    return;
+  }
+
+  const day = state.days[state.activeDayIdx];
+  if (!day) return;
+
+  day.exercises.forEach((ex, ei) => {
+    const card = buildMyExCard(ex, ei, type);
+    grid.appendChild(card);
+  });
+
+  // "+ add exercise" card
+  const addCard = document.createElement('button');
+  addCard.className = 'add-exercise-card';
+  addCard.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add exercise`;
+  addCard.addEventListener('click', () => {
+    day.exercises.push({ name:'', sets:'', reps:'', weight:'', mediaUrl:'', mediaData:'' });
+    const newIdx = day.exercises.length - 1;
+    renderExerciseGrid(type);
+    // auto-open panel for the new card
+    openExDetail(type, newIdx);
+  });
+  grid.appendChild(addCard);
+}
+
+/* ── BUILD MY-EX CARD  (fully locked — only expand btn edits) ── */
+function buildMyExCard(ex, exIdx, planType) {
+  const card = document.createElement('div');
+  card.className = 'my-ex-card';
+
+  /* ── TOP ROW: name display + expand button ── */
+  const top = document.createElement('div');
+  top.className = 'my-ex-card-top';
+
+  // Name shown as plain text, pointer-events:none (locked via CSS)
+  const nameTxt = document.createElement('div');
+  nameTxt.className   = 'my-ex-card-name';
+  nameTxt.textContent = ex.name || 'Unnamed exercise';
+
+  // EXPAND BUTTON — the ONLY way to edit
+  const expandBtn = document.createElement('button');
+  expandBtn.className = 'my-ex-expand-btn';
+  expandBtn.title     = 'Edit exercise';
+  expandBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M11 4H4v7"/><path d="M4 4l7 7"/><path d="M13 20h7v-7"/><path d="M20 20l-7-7"/></svg>`;
+  expandBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    openExDetail(planType, exIdx);
+  });
+
+  top.appendChild(nameTxt);
+  top.appendChild(expandBtn);
+
+  /* ── STAT CHIPS (read-only display) ── */
+  const statsRow = document.createElement('div');
+  statsRow.className = 'my-ex-card-stats';
+
+  function makeChip(label, val) {
+    const chip = document.createElement('div');
+    chip.className = 'my-ex-stat-chip';
+    chip.innerHTML = `
+      <div class="my-ex-stat-chip-label">${label}</div>
+      <div class="my-ex-stat-chip-val ${val ? '' : 'empty'}">${val || '—'}</div>`;
+    return chip;
+  }
+  statsRow.appendChild(makeChip('Sets', ex.sets));
+  statsRow.appendChild(makeChip('Reps', ex.reps));
+
+  /* ── WEIGHT ROW ── */
+  const weightRow = document.createElement('div');
+  weightRow.className = 'my-ex-weight-row';
+  weightRow.innerHTML = `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M6 3v5l-2 2 2 2v5"/><path d="M18 3v5l2 2-2 2v5"/>
+      <line x1="6" y1="8" x2="18" y2="8"/><line x1="6" y1="16" x2="18" y2="16"/>
+    </svg>
+    <span class="my-ex-weight-val">${ex.weight || 'No weight logged'}</span>`;
+
+  /* ── DELETE BUTTON ── */
+  const delBtn = document.createElement('button');
+  delBtn.className   = 'my-ex-del-btn';
+  delBtn.textContent = '🗑 Remove exercise';
+  delBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    const day = myPlanState[planType].days[myPlanState[planType].activeDayIdx];
+    day.exercises.splice(exIdx, 1);
+    renderExerciseGrid(planType);
+  });
+
+  card.appendChild(top);
+  card.appendChild(statsRow);
+  card.appendChild(weightRow);
+  card.appendChild(delBtn);
+  return card;
+}
+
+/* ════════════════════════════════════════════════
+   EXERCISE DETAIL PANEL
+════════════════════════════════════════════════ */
+let panelPlanType = 'workout';
+let panelExIdx    = 0;
+
+function openExDetail(planType, exIdx) {
+  panelPlanType = planType;
+  panelExIdx    = exIdx;
+
+  const day = myPlanState[planType].days[myPlanState[planType].activeDayIdx];
+  const ex  = day?.exercises[exIdx] || {};
+
+  document.getElementById('ex-detail-name-input').value  = ex.name   || '';
+  document.getElementById('ex-detail-sets').value        = ex.sets   || '';
+  document.getElementById('ex-detail-reps').value        = ex.reps   || '';
+  document.getElementById('ex-detail-weight').value      = ex.weight || '';
+  document.getElementById('ex-detail-media-url').value   = ex.mediaUrl || '';
+
+  // Clear previews
+  clearMediaUpload();
+  document.getElementById('media-link-preview').style.display = 'none';
+
+  // Restore media
+  if (ex.mediaData && ex.mediaData.startsWith('data:image')) {
+    showImgPreview(ex.mediaData);
+  } else if (ex.mediaData && ex.mediaData.startsWith('data:video')) {
+    showVidPreview(ex.mediaData);
+  } else if (ex.mediaUrl) {
+    showLinkTab();
+    previewMediaLink(ex.mediaUrl);
+  }
+
+  document.getElementById('ex-detail-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('ex-detail-name-input').focus(), 120);
+}
+
+function closeExDetail() {
+  document.getElementById('ex-detail-overlay').classList.remove('open');
+}
+
+function saveExDetail() {
+  const day = myPlanState[panelPlanType].days[myPlanState[panelPlanType].activeDayIdx];
+  if (!day) { closeExDetail(); return; }
+
+  const ex = day.exercises[panelExIdx] || {};
+  ex.name     = document.getElementById('ex-detail-name-input').value.trim();
+  ex.sets     = document.getElementById('ex-detail-sets').value.trim();
+  ex.reps     = document.getElementById('ex-detail-reps').value.trim();
+  ex.weight   = document.getElementById('ex-detail-weight').value.trim();
+  ex.mediaUrl = document.getElementById('ex-detail-media-url').value.trim();
+  // keep mediaData from whatever was stored
+  day.exercises[panelExIdx] = ex;
+
+  closeExDetail();
+  renderExerciseGrid(panelPlanType);
+}
+
+/* Close on overlay backdrop click */
+document.getElementById('ex-detail-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('ex-detail-overlay')) closeExDetail();
+});
+
+/* ── MEDIA TABS ── */
+document.getElementById('media-tab-upload').addEventListener('click', () => {
+  document.getElementById('media-tab-upload').classList.add('active');
+  document.getElementById('media-tab-link').classList.remove('active');
+  document.getElementById('media-body-upload').style.display = '';
+  document.getElementById('media-body-link').style.display   = 'none';
+});
+document.getElementById('media-tab-link').addEventListener('click', showLinkTab);
+function showLinkTab() {
+  document.getElementById('media-tab-link').classList.add('active');
+  document.getElementById('media-tab-upload').classList.remove('active');
+  document.getElementById('media-body-link').style.display   = '';
+  document.getElementById('media-body-upload').style.display = 'none';
+}
+
+/* ── FILE UPLOAD ── */
+document.getElementById('media-file-input').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const data = ev.target.result;
+    // Store onto current exercise
+    const day = myPlanState[panelPlanType].days[myPlanState[panelPlanType].activeDayIdx];
+    if (day && day.exercises[panelExIdx]) day.exercises[panelExIdx].mediaData = data;
+    if (file.type.startsWith('image/')) showImgPreview(data);
+    else showVidPreview(data);
+  };
+  reader.readAsDataURL(file);
+});
+
+function showImgPreview(src) {
+  document.getElementById('media-upload-placeholder').style.display = 'none';
+  document.getElementById('media-upload-preview').style.display     = '';
+  document.getElementById('media-img-preview').src                  = src;
+  document.getElementById('media-img-preview').style.display        = '';
+  document.getElementById('media-vid-preview').style.display        = 'none';
+}
+function showVidPreview(src) {
+  document.getElementById('media-upload-placeholder').style.display = 'none';
+  document.getElementById('media-upload-preview').style.display     = '';
+  document.getElementById('media-vid-preview').src                  = src;
+  document.getElementById('media-vid-preview').style.display        = '';
+  document.getElementById('media-img-preview').style.display        = 'none';
+}
+function clearMediaUpload() {
+  document.getElementById('media-file-input').value                 = '';
+  document.getElementById('media-upload-placeholder').style.display = '';
+  document.getElementById('media-upload-preview').style.display     = 'none';
+  document.getElementById('media-img-preview').src                  = '';
+  document.getElementById('media-vid-preview').src                  = '';
+}
+
+/* ── LINK PREVIEW ── */
+function previewMediaLink(url) {
+  const val = url || document.getElementById('ex-detail-media-url').value.trim();
+  if (!val) return;
+  const preview = document.getElementById('media-link-preview');
+  const isYT    = /youtube\.com|youtu\.be/.test(val);
+  const isImg   = /\.(jpg|jpeg|png|gif|webp)(\?|$)/i.test(val);
+  if (isYT) {
+    const id  = val.match(/(?:v=|youtu\.be\/)([^&?]+)/)?.[1];
+    if (id) { preview.innerHTML = `<iframe width="100%" style="aspect-ratio:16/9;border:none;border-radius:4px;" src="https://www.youtube.com/embed/${id}" allowfullscreen></iframe>`; preview.style.display=''; }
+  } else if (isImg) {
+    preview.innerHTML = `<img src="${val}" style="width:100%;border-radius:4px;aspect-ratio:16/9;object-fit:cover;">`;
+    preview.style.display='';
+  } else {
+    preview.innerHTML = `<video src="${val}" controls style="width:100%;border-radius:4px;aspect-ratio:16/9;"></video>`;
+    preview.style.display='';
+  }
+}
+
+/* ════════════════════════════════════════════════
+   SAVE MY PLAN TO SUPABASE
+════════════════════════════════════════════════ */
+async function saveMyPlan(type) {
+  const table = type === 'workout' ? 'workout_plans' : 'diet_plans';
+  const state = myPlanState[type];
+
+  // Delete existing trainee rows
+  await sb.from(table).delete()
+    .eq('trainee_id', currentUser.id)
+    .eq('created_by', 'trainee');
+
+  if (state.days.length > 0) {
+    const rows = state.days.map((day, i) => ({
+      trainee_id: currentUser.id,
+      coach_id:   relationship?.coach_id || currentUser.id,
+      day_label:  day.day_label,
+      items:      day.exercises,
+      sort_order: i,
+      created_by: 'trainee'
+    }));
+    const { error } = await sb.from(table).insert(rows);
+    if (error) { showToast('Error: ' + error.message); return; }
+  }
+  showToast((type === 'workout' ? 'Workout' : 'Diet') + ' plan saved ✓');
+}
+
+document.getElementById('save-my-workout-btn').addEventListener('click', () => saveMyPlan('workout'));
+document.getElementById('save-my-diet-btn').addEventListener('click',    () => saveMyPlan('diet'));
+
+/* ════════════════════════════════════════════════
+   SECTION NAVIGATION
+════════════════════════════════════════════════ */
+const SECTIONS = ['overview','profile','workout','diet'];
+
+function setSection(secId) {
+  SECTIONS.forEach(s => document.getElementById('section-'+s).classList.add('hidden'));
+  document.getElementById('section-'+secId).classList.remove('hidden');
+  document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('menu-item-'+secId)?.classList.add('active');
+
+  if (secId === 'workout' && !workoutLoaded.coach) loadCoachPlan('workout');
+  if (secId === 'diet'    && !dietLoaded.coach)    loadCoachPlan('diet');
+}
+
+document.getElementById('menu-item-overview').addEventListener('click', () => setSection('overview'));
+document.getElementById('menu-item-profile') .addEventListener('click', () => setSection('profile'));
+document.getElementById('menu-item-workout') .addEventListener('click', () => setSection('workout'));
+document.getElementById('menu-item-diet')    .addEventListener('click', () => setSection('diet'));
+
+/* ── SIDEBAR / THEME / NAV ── */
+document.getElementById('themeToggle').addEventListener('click', () => {
+  const t    = document.documentElement.getAttribute('data-theme');
+  const next = t === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('t0-theme', next);
+});
+document.querySelectorAll('.toggle-sidebar-trigger').forEach(btn =>
+  btn.addEventListener('click', () => document.getElementById('dash-layout').classList.toggle('sidebar-collapsed'))
+);
+const navMenu = document.getElementById('navDropdownMenu');
+const menuBtn = document.getElementById('menu-toggle-btn');
+menuBtn.addEventListener('click', e => { e.stopPropagation(); const o=navMenu.classList.toggle('show'); menuBtn.setAttribute('aria-expanded',String(o)); });
+navMenu.addEventListener('click', e => e.stopPropagation());
+window.addEventListener('click', () => navMenu.classList.remove('show'));
+document.getElementById('signout-btn').addEventListener('click', async e => {
+  e.preventDefault();
+  await sb.auth.signOut();
+  window.location.href = 'auth.html';
+});
+document.getElementById('nav-logo').addEventListener('click', () => window.location.href = 'index.html');
+
+/* ── TOAST ── */
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
 </script>
 </body>
 </html>
