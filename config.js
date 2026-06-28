@@ -1,2 +1,11 @@
 const SUPABASE_URL  = 'https://smctblcoeqtnbgwzsihv.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtY3RibGNvZXF0bmJnd3pzaWh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0OTA0MzQsImV4cCI6MjA5ODA2NjQzNH0.k0ECev5mUAg1mwsuM9KJ9bOVxtb6ajC1XNECFaXjF8o';
+
+// Security Utility
+const escapeHTML = (str) => String(str || '').replace(/[&<>'"]/g, tag => ({
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  "'": '&#39;',
+  '"': '&quot;'
+}[tag]));
