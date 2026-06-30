@@ -12,33 +12,6 @@
   </script>
   <style>
     /* ── COACH EXTRA STYLES ── */
-    .user-id-chip {
-      display: inline-flex; align-items: center; gap: 0.5rem;
-      background: rgba(255,107,43,0.08);
-      border: 1px solid rgba(255,107,43,0.2);
-      border-radius: 4px;
-      padding: 0.3rem 0.7rem;
-      font-size: 0.72rem;
-      color: var(--text-sec);
-      font-family: monospace;
-      cursor: pointer;
-      transition: all 0.2s;
-      max-width: 260px;
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-    }
-    .user-id-chip:hover { border-color: var(--orange); color: var(--orange); }
-
-    /* Modal shared */
-    .modal-bg { position:fixed; inset:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(8px); display:none; justify-content:center; align-items:center; z-index:300; }
-    .modal-bg.open { display:flex; }
-    .modal { background:var(--surface); border:1px solid var(--border-col); padding:2rem; width:100%; max-width:500px; border-radius:8px; position:relative; max-height:90vh; overflow-y:auto; }
-    .modal-close { position:absolute; top:1rem; right:1rem; background:transparent; border:none; color:var(--text-sec); font-size:1.2rem; cursor:pointer; }
-    .modal h2 { font-family:var(--font-display); font-size:1.8rem; margin-bottom:0.25rem; }
-    .modal p.sub { color:var(--text-sec); font-size:0.85rem; margin-bottom:1.5rem; }
-
-    /* Add client modal */
     .modal-field { display:flex; flex-direction:column; gap:0.4rem; margin-bottom:1rem; }
     .modal-field label { font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-sec); }
     .modal-field input, .modal-field textarea, .modal-field select {
@@ -51,10 +24,8 @@
     .modal-field textarea { height:80px; resize:vertical; }
     .modal-actions { display:flex; justify-content:flex-end; gap:0.75rem; margin-top:1.5rem; }
 
-    /* Plan editor */
     .plan-editor-day { background:var(--card-bg); border:1px solid var(--border-col); border-radius:6px; padding:1rem; margin-bottom:0.75rem; }
     .plan-editor-day-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:0.75rem; }
-    .plan-editor-day-label { font-size:0.85rem; font-weight:700; color:var(--orange); }
     .plan-item-row { display:flex; align-items:center; gap:0.5rem; margin-bottom:0.4rem; }
     .plan-item-row input { flex:1; background:var(--input-bg); border:1px solid var(--input-border); color:var(--text); padding:0.5rem 0.75rem; border-radius:4px; font-family:var(--font-body); font-size:0.85rem; outline:none; }
     .plan-item-row input:focus { border-color:var(--orange); }
@@ -66,36 +37,19 @@
     .btn-add-day { background:transparent; border:1px dashed var(--border-col); color:var(--text-sec); padding:0.6rem 1.2rem; border-radius:4px; font-size:0.85rem; cursor:pointer; font-family:var(--font-body); width:100%; margin-bottom:1rem; transition:all 0.2s; }
     .btn-add-day:hover { border-color:var(--orange); color:var(--orange); }
 
-    /* Toast */
-    .toast {
-      position: fixed; bottom: 2rem; right: 2rem;
-      background: #1a1a1a; border: 1px solid #333;
-      color: var(--text); padding: 0.75rem 1.25rem;
-      border-radius: 6px; font-size: 0.85rem;
-      z-index: 999; transform: translateY(100px); opacity: 0;
-      transition: all 0.3s; box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-    }
-    .toast.show { transform: translateY(0); opacity: 1; }
-
-    /* Empty state */
     .empty-state { text-align:center; padding:4rem 2rem; color:var(--text-sec); }
     .empty-state h3 { font-size:1.1rem; margin-bottom:0.5rem; color:var(--text); }
     .empty-state p { font-size:0.85rem; margin-bottom:1.5rem; }
 
-    /* Search bar */
     .search-bar { position:relative; margin-bottom:1.5rem; }
     .search-bar input { width:100%; background:var(--input-bg); border:1px solid var(--input-border); color:var(--text); padding:0.7rem 0.9rem 0.7rem 2.5rem; border-radius:4px; font-family:var(--font-body); font-size:0.9rem; outline:none; transition:border-color 0.15s; }
     .search-bar input:focus { border-color:var(--orange); }
     .search-bar svg { position:absolute; left:0.75rem; top:50%; transform:translateY(-50%); width:16px; height:16px; stroke:var(--text-sec); fill:none; pointer-events:none; }
 
-    /* Progress input */
     input[type="range"] { -webkit-appearance:none; width:100%; height:4px; background:var(--border-col); border-radius:2px; outline:none; }
     input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; width:16px; height:16px; border-radius:50%; background:var(--orange); cursor:pointer; }
     .progress-row { display:flex; align-items:center; gap:1rem; }
     .progress-val { font-size:0.85rem; font-weight:700; color:var(--orange); min-width:35px; }
-
-    .client-profile-card-layout { display:grid; grid-template-columns:80px 1fr; gap:2rem; }
-    @media(max-width:600px) { .client-profile-card-layout { grid-template-columns:1fr; } }
   </style>
 </head>
 <body>

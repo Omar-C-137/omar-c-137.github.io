@@ -1,15 +1,4 @@
 /* ── TRAINEE EXTRA ── */
-.user-id-chip {
-  display:inline-flex; align-items:center; gap:0.5rem;
-  background:rgba(255,107,43,0.08); border:1px solid rgba(255,107,43,0.2);
-  border-radius:4px; padding:0.3rem 0.7rem; font-size:0.72rem;
-  color:var(--text-sec); font-family:monospace; cursor:pointer; transition:all 0.2s;
-}
-.user-id-chip:hover { border-color:var(--orange); color:var(--orange); }
-
-.toast { position:fixed; bottom:2rem; right:2rem; background:#1a1a1a; border:1px solid #333; color:var(--text); padding:0.75rem 1.25rem; border-radius:6px; font-size:0.85rem; z-index:999; transform:translateY(100px); opacity:0; transition:all 0.3s; }
-.toast.show { transform:translateY(0); opacity:1; }
-
 /* Coach info card */
 .coach-card {
   background:var(--card-bg); border:1px solid var(--border-col);
@@ -106,7 +95,7 @@
   white-space: nowrap;
   position: relative;
 }
-.day-pill:hover { border-color: #444; color: var(--text); }
+.day-pill:hover { border-color: var(--orange); color: var(--text); }
 .day-pill.active { background: var(--orange); border-color: var(--orange); color: #fff; }
 .day-pill .pill-del {
   display: none;
@@ -167,7 +156,7 @@
   transition: border-color 0.2s;
   position: relative;
 }
-.my-ex-card:hover { border-color: #333; }
+.my-ex-card:hover { border-color: var(--orange); }
 .my-ex-card-top {
   display: flex;
   align-items: flex-start;
@@ -247,6 +236,7 @@
   align-items: flex-end;
   justify-content: center;
 }
+[data-theme="light"] .ex-detail-overlay { background: rgba(0,0,0,0.5); }
 .ex-detail-overlay.open { display: flex; }
 @media (min-width: 600px) {
   .ex-detail-overlay { align-items: center; }
@@ -390,6 +380,3 @@
 }
 .add-exercise-card:hover { border-color: var(--orange); color: var(--orange); }
 
-/* Sidebar role badge */
-.role-badge { display:inline-block; background:rgba(255,107,43,0.12); color:var(--orange); font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; padding:0.15rem 0.5rem; border-radius:3px; }
-.form-group select { background:var(--input-bg); border:1px solid var(--input-border); color:var(--text); padding:0.75rem 1rem; border-radius:4px; font-family:var(--font-body); font-size:0.9rem; outline:none; }
