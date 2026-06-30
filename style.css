@@ -185,6 +185,7 @@ nav {
   background-image: linear-gradient(rgba(255,107,43,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,107,43,0.03) 1px, transparent 1px);
   background-size: 40px 40px;
   z-index: 1;
+  pointer-events: none;
 }
 
 .glow-orb {
@@ -216,6 +217,7 @@ nav {
   display: inline-block;
 }
 .hero-btns {
+  position: relative;
   display: flex;
   gap: 1.2rem;
   z-index: 2;
