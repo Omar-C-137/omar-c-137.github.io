@@ -161,16 +161,6 @@ nav {
   gap: 0.5rem;
 }
 
-#submit-add-client-btn {
-  padding: 0.6rem 1.5rem;
-  font-size: 0.85rem;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
 /* ─── PAGES MANAGEMENT ─── */
 .page { display: none; padding-top: 70px; min-height: 100vh; }
 .page.active { display: block; }

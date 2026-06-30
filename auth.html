@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://smctblcoeqtnbgwzsihv.supabase.co; frame-src https://www.youtube.com;">
   <title>T-0 — Sign In</title>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="style.css"/>
@@ -299,7 +300,7 @@
 </div>
 
 <script src="config.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" integrity="sha384-JWEyvHh+lRf0sN/WWY+QTQwX+CyWqmNg4tkc8GQzAMEtR2wGNrCJlvnu1lHD1kDm" crossorigin="anonymous"></script>
 <script>
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -338,6 +339,15 @@ function showErr(msg) { errEl.textContent = msg; errEl.classList.add('show'); ok
 function showOk(msg)  { okEl.textContent  = msg; okEl.classList.add('show');  errEl.classList.remove('show'); }
 function clearMessages() { errEl.classList.remove('show'); okEl.classList.remove('show'); }
 
+let lastAuthClick = 0;
+
+function throttleAuth() {
+  var now = Date.now();
+  if (now - lastAuthClick < 2000) return true;
+  lastAuthClick = now;
+  return false;
+}
+
 /* ── REDIRECT AFTER LOGIN ── */
 async function redirectToDashboard(userId) {
   const { data: profile } = await sb.from('profiles').select('role').eq('id', userId).single();
@@ -359,6 +369,7 @@ sb.auth.onAuthStateChange(async (event, session) => {
 
 /* ── SIGN IN ── */
 document.getElementById('btn-signin').addEventListener('click', async () => {
+  if (throttleAuth()) return;
   const email = document.getElementById('si-email').value.trim();
   const pass  = document.getElementById('si-password').value;
   if (!email || !pass) { showErr('Please fill in all fields.'); return; }
@@ -372,6 +383,7 @@ document.getElementById('btn-signin').addEventListener('click', async () => {
 
 /* ── SIGN UP ── */
 document.getElementById('btn-signup').addEventListener('click', async () => {
+  if (throttleAuth()) return;
   const name  = document.getElementById('su-name').value.trim();
   const email = document.getElementById('su-email').value.trim();
   const pass  = document.getElementById('su-password').value;
@@ -394,7 +406,7 @@ async function googleAuth() {
   clearMessages();
   const { error } = await sb.auth.signInWithOAuth({
     provider: 'google',
-    options: { redirectTo: window.location.hostname.includes('github.io') ? 'https://omar-c-137.github.io/T-0/auth.html' : window.location.origin + '/auth.html' }
+    options: { redirectTo: window.location.origin + '/auth.html' }
   });
   if (error) showErr(error.message);
 }

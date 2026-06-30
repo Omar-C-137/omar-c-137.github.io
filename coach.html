@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://smctblcoeqtnbgwzsihv.supabase.co; frame-src https://www.youtube.com;">
   <title>T-0 — Coach Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="style.css"/>
@@ -326,7 +327,7 @@
 <div class="toast" id="toast"></div>
 
 <script src="config.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" integrity="sha384-JWEyvHh+lRf0sN/WWY+QTQwX+CyWqmNg4tkc8GQzAMEtR2wGNrCJlvnu1lHD1kDm" crossorigin="anonymous"></script>
 <script>
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -334,26 +335,54 @@ const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
 let currentUser = null;
 let currentProfile = null;
 let clients = [];
-let currentClientId = null; // trainee_id of currently open client
+let currentClientId = null;
 
-/* ── AUTH GUARD ── */
+function esc(str) {
+  var d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+var toastTimer;
+
+function showToast(msg) {
+  clearTimeout(toastTimer);
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  toastTimer = setTimeout(function() { t.classList.remove('show'); }, 2800);
+}
+
+var lastClick = {};
+
+function throttleClick(key, ms) {
+  var now = Date.now();
+  if (lastClick[key] && now - lastClick[key] < ms) { return true; }
+  lastClick[key] = now;
+  return false;
+}
+
 async function init() {
-  const { data: { session } } = await sb.auth.getSession();
-  if (!session) { window.location.href = 'auth.html'; return; }
-  currentUser = session.user;
+  try {
+    var s = await sb.auth.getSession();
+    if (!s.data.session) { window.location.href = 'auth.html'; return; }
+    currentUser = s.data.session.user;
 
-  const { data: profile } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
-  if (!profile || profile.role !== 'coach') { window.location.href = 'trainee.html'; return; }
-  currentProfile = profile;
-  populateProfileUI();
-  loadClients();
+    var p = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
+    if (p.error) throw p.error;
+    if (!p.data || p.data.role !== 'coach') { window.location.href = 'trainee.html'; return; }
+    currentProfile = p.data;
+    populateProfileUI();
+    loadClients();
+  } catch (e) {
+    showToast('Failed to initialize: ' + e.message);
+  }
 }
 init();
 
-/* ── PROFILE UI ── */
 function populateProfileUI() {
-  const name = currentProfile.full_name || currentUser.email;
-  const initials = name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+  var name = currentProfile.full_name || currentUser.email;
+  var initials = name.split(' ').map(function(n) { return n[0]; }).join('').substring(0, 2).toUpperCase();
   document.getElementById('sb-coach-name').textContent = name;
   document.getElementById('header-coach-name').textContent = name.split(' ')[0] + '!';
   document.getElementById('profile-avatar').textContent = initials;
@@ -363,108 +392,112 @@ function populateProfileUI() {
   document.getElementById('pf-specialty').value = currentProfile.specialty || '';
   document.getElementById('pf-bio').value = currentProfile.bio || '';
 
-  const idEl = document.getElementById('profile-user-id');
+  var idEl = document.getElementById('profile-user-id');
   idEl.textContent = '📋 ' + currentUser.id;
-  idEl.addEventListener('click', () => {
-    navigator.clipboard.writeText(currentUser.id).then(() => showToast('User ID copied!'));
+  idEl.addEventListener('click', function() {
+    navigator.clipboard.writeText(currentUser.id).then(function() { showToast('User ID copied!'); });
   });
 }
 
-document.getElementById('save-profile-btn').addEventListener('click', async () => {
-  const updates = {
+document.getElementById('save-profile-btn').addEventListener('click', async function() {
+  if (throttleClick('save-profile', 1000)) return;
+  var updates = {
     full_name: document.getElementById('pf-name').value.trim(),
     specialty: document.getElementById('pf-specialty').value.trim(),
     bio: document.getElementById('pf-bio').value.trim()
   };
-  const { error } = await sb.from('profiles').update(updates).eq('id', currentUser.id);
-  if (error) showToast('Error: ' + error.message);
-  else {
-    currentProfile = { ...currentProfile, ...updates };
+  try {
+    var r = await sb.from('profiles').update(updates).eq('id', currentUser.id);
+    if (r.error) { showToast('Error: ' + r.error.message); return; }
+    currentProfile = Object.assign({}, currentProfile, updates);
     populateProfileUI();
     showToast('Profile saved ✓');
+  } catch (e) {
+    showToast('Network error saving profile');
   }
 });
 
-/* ── LOAD CLIENTS ── */
 async function loadClients() {
-  const { data, error } = await sb
-    .from('coach_clients')
-    .select('*, trainee:profiles!coach_clients_trainee_id_fkey(id,full_name,email)')
-    .eq('coach_id', currentUser.id)
-    .order('created_at');
-  if (error) { console.error(error); return; }
-  clients = data || [];
-  renderClients();
-  renderSubmenu();
+  try {
+    var r = await sb
+      .from('coach_clients')
+      .select('*, trainee:profiles!coach_clients_trainee_id_fkey(id,full_name,email)')
+      .eq('coach_id', currentUser.id)
+      .order('created_at');
+    if (r.error) { console.error(r.error); return; }
+    clients = r.data || [];
+    renderClients();
+    renderSubmenu();
+  } catch (e) {
+    showToast('Failed to load clients');
+  }
 }
 
-/* ── RENDER CLIENTS GRID ── */
-function renderClients(filter='') {
-  const grid = document.getElementById('clients-grid');
-  let list = clients;
-  if (filter) list = clients.filter(c => (c.trainee?.full_name||'').toLowerCase().includes(filter.toLowerCase()));
+function renderClients(filter) {
+  if (!filter) filter = '';
+  var grid = document.getElementById('clients-grid');
+  var list = clients;
+  if (filter) list = clients.filter(function(c) { return (c.trainee && c.trainee.full_name || '').toLowerCase().includes(filter.toLowerCase()); });
 
   if (list.length === 0) {
-    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
-      <h3>No clients yet</h3>
-      <p>Add a trainee using their User ID</p>
-      <button class="btn btn-orange btn-sm" onclick="openAddModal()">+ Add client</button>
-    </div>`;
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1">' +
+      '<h3>No clients yet</h3>' +
+      '<p>Add a trainee using their User ID</p>' +
+      '<button class="btn btn-orange btn-sm" id="empty-add-btn">+ Add client</button></div>';
+    var addBtn = document.getElementById('empty-add-btn');
+    if (addBtn) addBtn.addEventListener('click', openAddModal);
     return;
   }
 
-  grid.innerHTML = list.map(c => {
-    const name = c.trainee?.full_name || 'Unknown';
-    const initials = name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
-    return `
-    <div class="client-card" data-id="${c.trainee_id}">
-      <div class="client-card-top">
-        <div class="client-avatar">${initials}</div>
-        <div class="client-name">${name}</div>
-        <span class="badge badge-${c.tag}">${c.tag}</span>
-      </div>
-      <div class="client-card-body">
-        <div class="stat-row"><span class="stat-label">Weight</span><span class="stat-val">${c.weight||'N/A'}</span></div>
-        <div class="stat-row"><span class="stat-label">Goal</span><span class="stat-val" style="font-size:11px">${c.goal||'—'}</span></div>
-        <div class="stat-row" style="margin-top:.5rem"><span class="stat-label">Progress</span><span class="stat-val" style="color:var(--orange)">${c.progress||0}%</span></div>
-        <div class="progress-bar"><div class="progress-fill" style="width:0%" data-w="${c.progress||0}"></div></div>
-      </div>
-    </div>`;
+  grid.innerHTML = list.map(function(c) {
+    var name = c.trainee ? c.trainee.full_name || 'Unknown' : 'Unknown';
+    var initials = name.split(' ').map(function(n) { return n[0]; }).join('').substring(0, 2).toUpperCase();
+    return '<div class="client-card" data-id="' + esc(c.trainee_id) + '">' +
+      '<div class="client-card-top">' +
+      '<div class="client-avatar">' + esc(initials) + '</div>' +
+      '<div class="client-name">' + esc(name) + '</div>' +
+      '<span class="badge badge-' + esc(c.tag) + '">' + esc(c.tag) + '</span>' +
+      '</div>' +
+      '<div class="client-card-body">' +
+      '<div class="stat-row"><span class="stat-label">Weight</span><span class="stat-val">' + esc(c.weight || 'N/A') + '</span></div>' +
+      '<div class="stat-row"><span class="stat-label">Goal</span><span class="stat-val" style="font-size:11px">' + esc(c.goal || '&mdash;') + '</span></div>' +
+      '<div class="stat-row" style="margin-top:.5rem"><span class="stat-label">Progress</span><span class="stat-val" style="color:var(--orange)">' + esc(c.progress || 0) + '%</span></div>' +
+      '<div class="progress-bar"><div class="progress-fill" style="width:0%" data-w="' + esc(c.progress || 0) + '"></div></div>' +
+      '</div></div>';
   }).join('');
 
-  grid.querySelectorAll('.client-card').forEach(card => {
-    card.addEventListener('click', () => openClient(card.getAttribute('data-id')));
+  grid.querySelectorAll('.client-card').forEach(function(card) {
+    card.addEventListener('click', function() { openClient(card.getAttribute('data-id')); });
   });
-  setTimeout(() => {
-    grid.querySelectorAll('.progress-fill').forEach(el => { el.style.width = el.getAttribute('data-w') + '%'; });
-  }, 50);
+  requestAnimationFrame(function() {
+    grid.querySelectorAll('.progress-fill').forEach(function(el) { el.style.width = el.getAttribute('data-w') + '%'; });
+  });
 }
 
 function renderSubmenu() {
-  const sub = document.getElementById('clients-submenu');
-  sub.innerHTML = clients.map(c => {
-    const name = c.trainee?.full_name || 'Unknown';
-    return `<div class="sidebar-sub" data-client-id="${c.trainee_id}">${name}</div>`;
+  var sub = document.getElementById('clients-submenu');
+  sub.innerHTML = clients.map(function(c) {
+    var name = c.trainee ? c.trainee.full_name || 'Unknown' : 'Unknown';
+    return '<div class="sidebar-sub" data-client-id="' + esc(c.trainee_id) + '">' + esc(name) + '</div>';
   }).join('');
-  sub.querySelectorAll('.sidebar-sub').forEach(el => {
-    el.addEventListener('click', () => openClient(el.getAttribute('data-client-id')));
+  sub.querySelectorAll('.sidebar-sub').forEach(function(el) {
+    el.addEventListener('click', function() { openClient(el.getAttribute('data-client-id')); });
   });
 }
 
-document.getElementById('client-search').addEventListener('input', e => renderClients(e.target.value));
+document.getElementById('client-search').addEventListener('input', function(e) { renderClients(e.target.value); });
 
-/* ── OPEN CLIENT DETAIL ── */
 async function openClient(traineeId) {
   currentClientId = traineeId;
-  const rel = clients.find(c => c.trainee_id === traineeId);
+  var rel = clients.find(function(c) { return c.trainee_id === traineeId; });
   if (!rel) return;
-  const name = rel.trainee?.full_name || 'Unknown';
-  const initials = name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+  var name = rel.trainee ? rel.trainee.full_name || 'Unknown' : 'Unknown';
+  var initials = name.split(' ').map(function(n) { return n[0]; }).join('').substring(0, 2).toUpperCase();
 
   document.getElementById('detail-initials').textContent = initials;
   document.getElementById('detail-av').textContent = initials;
   document.getElementById('detail-name').textContent = name;
-  document.getElementById('detail-meta').textContent = `Weight: ${rel.weight||'N/A'} · Goal: ${rel.goal||'—'}`;
+  document.getElementById('detail-meta').textContent = 'Weight: ' + (rel.weight || 'N/A') + ' \u00B7 Goal: ' + (rel.goal || '\u2014');
   document.getElementById('breadcrumb-name').textContent = name;
   document.getElementById('cf-name').value = name;
   document.getElementById('cf-weight').value = rel.weight || '';
@@ -475,7 +508,7 @@ async function openClient(traineeId) {
   document.getElementById('cf-tag').value = rel.tag || 'new';
   updateProgressDisplay(rel.progress || 0);
 
-  document.querySelectorAll('.sidebar-sub').forEach(el => {
+  document.querySelectorAll('.sidebar-sub').forEach(function(el) {
     el.classList.toggle('active', el.getAttribute('data-client-id') === traineeId);
   });
 
@@ -483,15 +516,16 @@ async function openClient(traineeId) {
   setSection('client-detail');
 }
 
-document.getElementById('cf-progress').addEventListener('input', e => updateProgressDisplay(e.target.value));
+document.getElementById('cf-progress').addEventListener('input', function(e) { updateProgressDisplay(e.target.value); });
 function updateProgressDisplay(v) {
   document.getElementById('progress-label').textContent = v + '%';
   document.getElementById('progress-val-display').textContent = v + '%';
 }
 
-document.getElementById('save-client-btn').addEventListener('click', async () => {
+document.getElementById('save-client-btn').addEventListener('click', async function() {
+  if (throttleClick('save-client', 1000)) return;
   if (!currentClientId) return;
-  const updates = {
+  var updates = {
     weight: document.getElementById('cf-weight').value.trim(),
     goal: document.getElementById('cf-goal').value.trim(),
     weekly_sessions: document.getElementById('cf-sessions').value.trim(),
@@ -499,70 +533,72 @@ document.getElementById('save-client-btn').addEventListener('click', async () =>
     progress: parseInt(document.getElementById('cf-progress').value) || 0,
     tag: document.getElementById('cf-tag').value
   };
-  const { error } = await sb.from('coach_clients').update(updates)
-    .eq('coach_id', currentUser.id).eq('trainee_id', currentClientId);
-  if (error) showToast('Error: ' + error.message);
-  else {
-    const idx = clients.findIndex(c => c.trainee_id === currentClientId);
-    if (idx !== -1) clients[idx] = { ...clients[idx], ...updates };
-    showToast('Client saved ✓');
+  try {
+    var r = await sb.from('coach_clients').update(updates)
+      .eq('coach_id', currentUser.id).eq('trainee_id', currentClientId);
+    if (r.error) { showToast('Error: ' + r.error.message); return; }
+    var idx = clients.findIndex(function(c) { return c.trainee_id === currentClientId; });
+    if (idx !== -1) clients[idx] = Object.assign({}, clients[idx], updates);
+    showToast('Client saved \u2713');
+  } catch (e) {
+    showToast('Network error saving client');
   }
 });
 
-/* ── PLAN EDITOR ── */
 function renderPlanEditor(containerId, days) {
-  const container = document.getElementById(containerId);
+  var container = document.getElementById(containerId);
   container.innerHTML = '';
-  (days || []).forEach((day, di) => {
+  (days || []).forEach(function(day, di) {
     container.appendChild(buildDayBlock(containerId, day.day_label, day.items, di));
   });
 }
 
-function buildExerciseRow(item={}) {
-  // item can be a string (legacy) or {name, sets, reps}
-  let name='', sets='', reps='';
+function buildExerciseRow(item) {
+  if (!item) item = {};
+  var name = '', sets = '', reps = '';
   if (typeof item === 'string') {
-    // Parse legacy "Exercise - 3 sets x 10 reps" or just "Exercise"
-    const match = item.match(/^(.+?)\s*-\s*(\d+)\s*[sx]\s*(\d+)/i);
-    if (match) { name=match[1].trim(); sets=match[2]; reps=match[3]; }
-    else { name=item; }
+    var match = item.match(/^(.+?)\s*-\s*(\d+)\s*[sx]\s*(\d+)/i);
+    if (match) { name = match[1].trim(); sets = match[2]; reps = match[3]; }
+    else { name = item; }
   } else {
-    name=item.name||''; sets=item.sets||''; reps=item.reps||'';
+    name = item.name || ''; sets = item.sets || ''; reps = item.reps || '';
   }
-  const row = document.createElement('div');
+  var row = document.createElement('div');
   row.className = 'plan-item-row exercise-item-row';
-  row.innerHTML = `
-    <input type="text" class="item-name" value="${name}" placeholder="Exercise name" style="flex:2"/>
-    <input type="text" class="item-sets" value="${sets}" placeholder="Sets" style="flex:0.6;text-align:center"/>
-    <span style="color:var(--text-sec);font-size:0.8rem;white-space:nowrap">×</span>
-    <input type="text" class="item-reps" value="${reps}" placeholder="Reps" style="flex:0.6;text-align:center"/>
-    <button class="plan-item-del remove-item-btn" title="Remove">✕</button>`;
-  row.querySelector('.remove-item-btn').addEventListener('click', () => row.remove());
+  row.innerHTML =
+    '<input type="text" class="item-name" value="' + esc(name) + '" placeholder="Exercise name" style="flex:2"/>' +
+    '<input type="text" class="item-sets" value="' + esc(sets) + '" placeholder="Sets" style="flex:0.6;text-align:center"/>' +
+    '<span style="color:var(--text-sec);font-size:0.8rem;white-space:nowrap">\u00D7</span>' +
+    '<input type="text" class="item-reps" value="' + esc(reps) + '" placeholder="Reps" style="flex:0.6;text-align:center"/>' +
+    '<button class="plan-item-del remove-item-btn" title="Remove">\u2715</button>';
+  row.querySelector('.remove-item-btn').addEventListener('click', function() { row.remove(); });
   return row;
 }
 
-function buildDayBlock(editorId, label='', items=[], dayIndex) {
-  const div = document.createElement('div');
+function buildDayBlock(editorId, label, items, dayIndex) {
+  if (!label) label = '';
+  if (!items) items = [];
+  var div = document.createElement('div');
   div.className = 'plan-editor-day';
   div.dataset.dayIndex = dayIndex;
 
-  div.innerHTML = `
-    <div class="plan-editor-day-header">
-      <input type="text" class="day-label-input" value="${label}" placeholder="Day label (e.g. Monday)" style="background:transparent;border:none;border-bottom:1px solid var(--border-col);color:var(--orange);font-size:0.85rem;font-weight:700;outline:none;padding:0.2rem 0;width:180px;font-family:var(--font-body)"/>
-      <button class="plan-item-del remove-day-btn" title="Remove day">🗑</button>
-    </div>
-    <div style="display:grid;grid-template-columns:2fr 0.6fr 12px 0.6fr 28px;gap:0.4rem;padding:0 0 0.4rem;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-sec)">
-      <span>Exercise</span><span style="text-align:center">Sets</span><span></span><span style="text-align:center">Reps</span><span></span>
-    </div>
-    <div class="items-container"></div>
-    <button class="btn-add-item add-item-btn" style="margin-top:0.5rem">+ Add exercise</button>`;
+  div.innerHTML =
+    '<div class="plan-editor-day-header">' +
+    '<input type="text" class="day-label-input" value="' + esc(label) + '" placeholder="Day label (e.g. Monday)" style="background:transparent;border:none;border-bottom:1px solid var(--border-col);color:var(--orange);font-size:0.85rem;font-weight:700;outline:none;padding:0.2rem 0;width:180px;font-family:var(--font-body)"/>' +
+    '<button class="plan-item-del remove-day-btn" title="Remove day">\uD83D\uDDD1</button>' +
+    '</div>' +
+    '<div style="display:grid;grid-template-columns:2fr 0.6fr 12px 0.6fr 28px;gap:0.4rem;padding:0 0 0.4rem;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-sec)">' +
+    '<span>Exercise</span><span style="text-align:center">Sets</span><span></span><span style="text-align:center">Reps</span><span></span>' +
+    '</div>' +
+    '<div class="items-container"></div>' +
+    '<button class="btn-add-item add-item-btn" style="margin-top:0.5rem">+ Add exercise</button>';
 
-  const container = div.querySelector('.items-container');
-  (items||[]).forEach(i => container.appendChild(buildExerciseRow(i)));
+  var container = div.querySelector('.items-container');
+  (items || []).forEach(function(i) { container.appendChild(buildExerciseRow(i)); });
 
-  div.querySelector('.remove-day-btn').addEventListener('click', () => div.remove());
-  div.querySelector('.add-item-btn').addEventListener('click', () => {
-    const row = buildExerciseRow();
+  div.querySelector('.remove-day-btn').addEventListener('click', function() { div.remove(); });
+  div.querySelector('.add-item-btn').addEventListener('click', function() {
+    var row = buildExerciseRow();
     container.appendChild(row);
     row.querySelector('.item-name').focus();
   });
@@ -571,98 +607,114 @@ function buildDayBlock(editorId, label='', items=[], dayIndex) {
 }
 
 function addDay(editorId) {
-  const container = document.getElementById(editorId);
-  const dayNum = container.querySelectorAll('.plan-editor-day').length + 1;
+  var container = document.getElementById(editorId);
+  var dayNum = container.querySelectorAll('.plan-editor-day').length + 1;
   container.appendChild(buildDayBlock(editorId, 'Day ' + dayNum, [], dayNum - 1));
 }
 
 function getPlanFromEditor(editorId) {
-  return Array.from(document.getElementById(editorId).querySelectorAll('.plan-editor-day')).map((d, i) => ({
-    day_label: d.querySelector('.day-label-input').value.trim() || ('Day ' + (i+1)),
-    items: Array.from(d.querySelectorAll('.exercise-item-row')).map(row => ({
-      name: row.querySelector('.item-name')?.value.trim() || '',
-      sets: row.querySelector('.item-sets')?.value.trim() || '',
-      reps: row.querySelector('.item-reps')?.value.trim() || ''
-    })).filter(item => item.name),
-    sort_order: i
-  }));
+  return Array.from(document.getElementById(editorId).querySelectorAll('.plan-editor-day')).map(function(d, i) {
+    return {
+      day_label: d.querySelector('.day-label-input').value.trim() || ('Day ' + (i + 1)),
+      items: Array.from(d.querySelectorAll('.exercise-item-row')).map(function(row) {
+        return {
+          name: (row.querySelector('.item-name') ? row.querySelector('.item-name').value.trim() : ''),
+          sets: (row.querySelector('.item-sets') ? row.querySelector('.item-sets').value.trim() : ''),
+          reps: (row.querySelector('.item-reps') ? row.querySelector('.item-reps').value.trim() : '')
+        };
+      }).filter(function(item) { return item.name; }),
+      sort_order: i
+    };
+  });
 }
 
-document.getElementById('add-workout-day').addEventListener('click', () => addDay('workout-editor'));
-document.getElementById('add-diet-day').addEventListener('click', () => addDay('diet-editor'));
+document.getElementById('add-workout-day').addEventListener('click', function() { addDay('workout-editor'); });
+document.getElementById('add-diet-day').addEventListener('click', function() { addDay('diet-editor'); });
 
-document.getElementById('save-workout-btn').addEventListener('click', async () => savePlan('workout'));
-document.getElementById('save-diet-btn').addEventListener('click', async () => savePlan('diet'));
+document.getElementById('save-workout-btn').addEventListener('click', async function() { await savePlan('workout'); });
+document.getElementById('save-diet-btn').addEventListener('click', async function() { await savePlan('diet'); });
 
 async function savePlan(type) {
+  if (throttleClick('save-plan', 1000)) return;
   if (!currentClientId) return;
-  const table = type === 'workout' ? 'workout_plans' : 'diet_plans';
-  const editorId = type === 'workout' ? 'workout-editor' : 'diet-editor';
-  const days = getPlanFromEditor(editorId);
+  var table = type === 'workout' ? 'workout_plans' : 'diet_plans';
+  var editorId = type === 'workout' ? 'workout-editor' : 'diet-editor';
+  var days = getPlanFromEditor(editorId);
 
-  // Delete existing coach-owned rows for this coach+trainee pair, then insert fresh coach rows
-  await sb.from(table)
-    .delete()
-    .eq('coach_id', currentUser.id)
-    .eq('trainee_id', currentClientId)
-    .eq('created_by', 'coach');
-  if (days.length > 0) {
-    const rows = days.map(d => ({
-      coach_id: currentUser.id,
-      trainee_id: currentClientId,
-      created_by: 'coach',
-      day_label: d.day_label,
-      items: d.items,
-      sort_order: d.sort_order
-    }));
-    const { error } = await sb.from(table).insert(rows);
-    if (error) { showToast('Error: ' + error.message); return; }
+  try {
+    var del = await sb.from(table)
+      .delete()
+      .eq('coach_id', currentUser.id)
+      .eq('trainee_id', currentClientId)
+      .eq('created_by', 'coach');
+    if (del.error) { showToast('Error: ' + del.error.message); return; }
+
+    if (days.length > 0) {
+      var rows = days.map(function(d) {
+        return {
+          coach_id: currentUser.id,
+          trainee_id: currentClientId,
+          created_by: 'coach',
+          day_label: d.day_label,
+          items: d.items,
+          sort_order: d.sort_order
+        };
+      });
+      var ins = await sb.from(table).insert(rows);
+      if (ins.error) { showToast('Error: ' + ins.error.message); return; }
+    }
+    showToast((type === 'workout' ? 'Workout' : 'Diet') + ' plan saved \u2713');
+  } catch (e) {
+    showToast('Network error saving plan');
   }
-  showToast((type === 'workout' ? 'Workout' : 'Diet') + ' plan saved ✓');
 }
 
 async function loadPlansForClient(traineeId) {
-  const [{ data: workout }, { data: diet }] = await Promise.all([
-    sb.from('workout_plans').select('*').eq('coach_id', currentUser.id).eq('trainee_id', traineeId).eq('created_by', 'coach').order('sort_order'),
-    sb.from('diet_plans').select('*').eq('coach_id', currentUser.id).eq('trainee_id', traineeId).eq('created_by', 'coach').order('sort_order')
-  ]);
-  renderPlanEditor('workout-editor', workout || []);
-  renderPlanEditor('diet-editor', diet || []);
+  try {
+    var r = await Promise.all([
+      sb.from('workout_plans').select('*').eq('coach_id', currentUser.id).eq('trainee_id', traineeId).eq('created_by', 'coach').order('sort_order'),
+      sb.from('diet_plans').select('*').eq('coach_id', currentUser.id).eq('trainee_id', traineeId).eq('created_by', 'coach').order('sort_order')
+    ]);
+    renderPlanEditor('workout-editor', r[0].data || []);
+    renderPlanEditor('diet-editor', r[1].data || []);
+  } catch (e) {
+    showToast('Failed to load plans');
+  }
 }
 
-/* ── DETAIL TABS ── */
 function switchDetailTab(tabName) {
-  ['profile','workout','diet'].forEach(t => {
-    document.getElementById('client-'+t+'-tab').classList.toggle('hidden', t !== tabName);
+  ['profile', 'workout', 'diet'].forEach(function(t) {
+    document.getElementById('client-' + t + '-tab').classList.toggle('hidden', t !== tabName);
   });
-  document.querySelectorAll('#detail-tabs .dash-tab').forEach(t => {
+  document.querySelectorAll('#detail-tabs .dash-tab').forEach(function(t) {
     t.classList.toggle('active', t.getAttribute('data-tab') === tabName);
   });
   if (tabName === 'workout' || tabName === 'diet') loadPlansForClient(currentClientId);
 }
-document.querySelectorAll('#detail-tabs .dash-tab').forEach(tab => {
-  tab.addEventListener('click', () => switchDetailTab(tab.getAttribute('data-tab')));
+document.querySelectorAll('#detail-tabs .dash-tab').forEach(function(tab) {
+  tab.addEventListener('click', function() { switchDetailTab(tab.getAttribute('data-tab')); });
 });
 
-/* ── SECTION NAVIGATION ── */
 function setSection(secId) {
-  ['profile','clients','client-detail'].forEach(s => {
-    document.getElementById('section-'+s).classList.add('hidden');
+  ['profile', 'clients', 'client-detail'].forEach(function(s) {
+    document.getElementById('section-' + s).classList.add('hidden');
   });
-  document.getElementById('section-'+secId).classList.remove('hidden');
-  document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('section-' + secId).classList.remove('hidden');
+  document.querySelectorAll('.sidebar-item').forEach(function(el) { el.classList.remove('active'); });
   if (secId === 'profile') document.getElementById('menu-item-profile').classList.add('active');
-  else if (secId === 'clients') { document.getElementById('menu-item-clients').classList.add('active'); renderClients(document.getElementById('client-search').value); }
+  else if (secId === 'clients') {
+    document.getElementById('menu-item-clients').classList.add('active');
+    renderClients(document.getElementById('client-search').value);
+  }
 }
 
-document.getElementById('menu-item-profile').addEventListener('click', () => setSection('profile'));
-document.getElementById('menu-item-clients').addEventListener('click', () => setSection('clients'));
-document.querySelectorAll('.tab-trigger-clients').forEach(el => el.addEventListener('click', () => setSection('clients')));
-document.querySelectorAll('.tab-trigger-profile').forEach(el => el.addEventListener('click', () => setSection('profile')));
-document.getElementById('detail-back-btn').addEventListener('click', () => setSection('clients'));
+document.getElementById('menu-item-profile').addEventListener('click', function() { setSection('profile'); });
+document.getElementById('menu-item-clients').addEventListener('click', function() { setSection('clients'); });
+document.querySelectorAll('.tab-trigger-clients').forEach(function(el) { el.addEventListener('click', function() { setSection('clients'); }); });
+document.querySelectorAll('.tab-trigger-profile').forEach(function(el) { el.addEventListener('click', function() { setSection('profile'); }); });
+document.getElementById('detail-back-btn').addEventListener('click', function() { setSection('clients'); });
 document.getElementById('header-add-client-btn').addEventListener('click', openAddModal);
 
-/* ── ADD CLIENT MODAL ── */
 function openAddModal() {
   document.getElementById('add-trainee-id').value = '';
   document.getElementById('add-goal').value = '';
@@ -672,79 +724,82 @@ function openAddModal() {
   document.getElementById('add-client-modal').classList.add('open');
 }
 
-let lookupTimeout;
-document.getElementById('add-trainee-id').addEventListener('input', e => {
+var lookupTimeout;
+document.getElementById('add-trainee-id').addEventListener('input', function(e) {
   clearTimeout(lookupTimeout);
-  const id = e.target.value.trim();
+  var id = e.target.value.trim();
   if (id.length < 10) { document.getElementById('trainee-preview').style.display = 'none'; return; }
-  lookupTimeout = setTimeout(async () => {
-    const { data } = await sb.from('profiles').select('full_name,email,role').eq('id', id).single();
-    if (data && data.role === 'trainee') {
-      document.getElementById('trainee-preview-name').textContent = data.full_name || '—';
-      document.getElementById('trainee-preview-email').textContent = data.email;
-      document.getElementById('trainee-preview').style.display = 'block';
-    } else {
+  lookupTimeout = setTimeout(async function() {
+    try {
+      var r = await sb.from('profiles').select('full_name,email,role').eq('id', id).single();
+      if (r.data && r.data.role === 'trainee') {
+        document.getElementById('trainee-preview-name').textContent = r.data.full_name || '\u2014';
+        document.getElementById('trainee-preview-email').textContent = r.data.email;
+        document.getElementById('trainee-preview').style.display = 'block';
+      } else {
+        document.getElementById('trainee-preview').style.display = 'none';
+      }
+    } catch (e) {
       document.getElementById('trainee-preview').style.display = 'none';
     }
   }, 500);
 });
 
-document.getElementById('add-modal-close').addEventListener('click', () => document.getElementById('add-client-modal').classList.remove('open'));
-document.getElementById('add-modal-cancel').addEventListener('click', () => document.getElementById('add-client-modal').classList.remove('open'));
+document.getElementById('add-modal-close').addEventListener('click', function() { document.getElementById('add-client-modal').classList.remove('open'); });
+document.getElementById('add-modal-cancel').addEventListener('click', function() { document.getElementById('add-client-modal').classList.remove('open'); });
 
-document.getElementById('confirm-add-client-btn').addEventListener('click', async () => {
-  const traineeId = document.getElementById('add-trainee-id').value.trim();
+document.getElementById('confirm-add-client-btn').addEventListener('click', async function() {
+  if (throttleClick('add-client', 2000)) return;
+  var traineeId = document.getElementById('add-trainee-id').value.trim();
   if (!traineeId) { showToast('Enter a trainee User ID'); return; }
 
-  // Verify trainee exists
-  const { data: traineeProfile } = await sb.from('profiles').select('id,full_name,email,role').eq('id', traineeId).single();
-  if (!traineeProfile) { showToast('No user found with that ID'); return; }
-  if (traineeProfile.role !== 'trainee') { showToast('That user is not a trainee'); return; }
+  try {
+    var tp = await sb.from('profiles').select('id,full_name,email,role').eq('id', traineeId).single();
+    if (!tp.data) { showToast('No user found with that ID'); return; }
+    if (tp.data.role !== 'trainee') { showToast('That user is not a trainee'); return; }
 
-  const newRel = {
-    coach_id: currentUser.id,
-    trainee_id: traineeId,
-    goal: document.getElementById('add-goal').value.trim(),
-    weight: document.getElementById('add-weight').value.trim(),
-    notes: document.getElementById('add-notes').value.trim(),
-    tag: 'new',
-    progress: 0
-  };
-  const { error } = await sb.from('coach_clients').insert(newRel);
-  if (error) { showToast(error.code === '23505' ? 'Already on your roster' : error.message); return; }
+    var newRel = {
+      coach_id: currentUser.id,
+      trainee_id: traineeId,
+      goal: document.getElementById('add-goal').value.trim(),
+      weight: document.getElementById('add-weight').value.trim(),
+      notes: document.getElementById('add-notes').value.trim(),
+      tag: 'new',
+      progress: 0
+    };
+    var ins = await sb.from('coach_clients').insert(newRel);
+    if (ins.error) { showToast(ins.error.code === '23505' ? 'Already on your roster' : ins.error.message); return; }
 
-  document.getElementById('add-client-modal').classList.remove('open');
-  await loadClients();
-  setSection('clients');
-  showToast(traineeProfile.full_name + ' added ✓');
+    document.getElementById('add-client-modal').classList.remove('open');
+    await loadClients();
+    setSection('clients');
+    showToast((tp.data.full_name || 'Trainee') + ' added \u2713');
+  } catch (e) {
+    showToast('Network error adding client');
+  }
 });
 
-/* ── SIDEBAR / THEME / NAV ── */
-document.getElementById('themeToggle').addEventListener('click', () => {
-  const t = document.documentElement.getAttribute('data-theme');
-  const next = t === 'dark' ? 'light' : 'dark';
+document.getElementById('themeToggle').addEventListener('click', function() {
+  var t = document.documentElement.getAttribute('data-theme');
+  var next = t === 'dark' ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', next);
   localStorage.setItem('t0-theme', next);
 });
-document.querySelectorAll('.toggle-sidebar-trigger').forEach(btn => {
-  btn.addEventListener('click', () => document.getElementById('dash-layout').classList.toggle('sidebar-collapsed'));
+document.querySelectorAll('.toggle-sidebar-trigger').forEach(function(btn) {
+  btn.addEventListener('click', function() { document.getElementById('dash-layout').classList.toggle('sidebar-collapsed'); });
 });
-const navMenu = document.getElementById('navDropdownMenu');
-const menuBtn = document.getElementById('menu-toggle-btn');
-menuBtn.addEventListener('click', e => { e.stopPropagation(); const o=navMenu.classList.toggle('show'); menuBtn.setAttribute('aria-expanded',String(o)); });
-navMenu.addEventListener('click', e => e.stopPropagation());
-window.addEventListener('click', () => navMenu.classList.remove('show'));
-document.getElementById('calorie-feature-btn').addEventListener('click', e => { e.preventDefault(); alert('Calorie Calculator — $4.99/mo add-on'); navMenu.classList.remove('show'); });
-document.getElementById('signout-btn').addEventListener('click', async e => { e.preventDefault(); await sb.auth.signOut(); window.location.href = 'auth.html'; });
-document.getElementById('nav-logo').addEventListener('click', () => { window.location.href = 'index.html'; });
-
-/* ── TOAST ── */
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2800);
-}
+var navMenu = document.getElementById('navDropdownMenu');
+var menuBtn = document.getElementById('menu-toggle-btn');
+menuBtn.addEventListener('click', function(e) {
+  e.stopPropagation();
+  var o = navMenu.classList.toggle('show');
+  menuBtn.setAttribute('aria-expanded', String(o));
+});
+navMenu.addEventListener('click', function(e) { e.stopPropagation(); });
+window.addEventListener('click', function() { navMenu.classList.remove('show'); });
+document.getElementById('calorie-feature-btn').addEventListener('click', function(e) { e.preventDefault(); alert('Calorie Calculator \u2014 $4.99/mo add-on'); navMenu.classList.remove('show'); });
+document.getElementById('signout-btn').addEventListener('click', async function(e) { e.preventDefault(); await sb.auth.signOut(); window.location.href = 'auth.html'; });
+document.getElementById('nav-logo').addEventListener('click', function() { window.location.href = 'index.html'; });
 </script>
 </body>
 </html>
